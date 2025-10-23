@@ -1,0 +1,16 @@
+1. Risk #1- Scope Creep- Coming up with too many ambitious ideas that differ from our main goal of our project,
+            For example, we tried to come up with a feature where we can match differet users based on their liked 
+            movie bank but this is too ambiitious and divergent from out main goal to just give user movie suggestions.
+            
+            Severity: pretty severe because slowing down the project and could cause lack of 
+                    communication which would decrease the overall eifficinecy of the project and even end 
+                    up not finishing the project
+
+            Mitigation: Be orhanbized and stick to one goal without distractionc, can do this by 
+                        chgarting down ideas with your group and all agreeing on the ones you want to focus on
+
+
+2. Risk #2- Database integrity- 
+
+3. Risk #3- Conflicting ideas/communication
+
