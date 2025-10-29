@@ -1,0 +1,23 @@
+Meet with TA- 10/28/25
+Scribe: Aswaanth Karuppasamy
+
+-Each meeting should talk about each individual’s progress. Also someone in the team should write down what we talked about in the meeting and type it into a .txt file and push it to the git repo. The scribe should be different for each TA meeting.
+
+Discussion:
+-we first talked about the features of the app
+
+Main features: 
+-swipe on movies
+-liked bank of movies
+-maybe some Ai involved 
+-login page
+
+Data:
+-we are getting movies from an open API source, this will be list of movies, genre, time length, etc
+
+-How will we get the data? → maybe get a category from the user when first login and then the api will only return 50 movies from that category, this will probably be the easiest way to get the data. 
+
+Task Assignments:
+-We need to assign different tasks to each person, but we can also work on each other’s tasks. Also it is important to COMMENT, so that future employers can see what you did.
+
+-Also if you miss a meeting pls reschedule individually with the TA
