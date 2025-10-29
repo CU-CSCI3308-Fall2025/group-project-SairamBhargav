@@ -1,16 +1,47 @@
-1. Risk #1- Scope Creep- Coming up with too many ambitious ideas that differ from our main goal of our project,
+1. Risk #1: Scope Creep- Coming up with too many ambitious ideas that differ from our main goal of our project,
             For example, we tried to come up with a feature where we can match differet users based on their liked 
             movie bank but this is too ambiitious and divergent from out main goal to just give user movie suggestions.
             
             Severity: pretty severe because slowing down the project and could cause lack of 
-                    communication which would decrease the overall eifficinecy of the project and even end 
-                    up not finishing the project
+            communication which would decrease the overall eifficinecy of the project and even end 
+            up not finishing the project
 
-            Mitigation: Be orhanbized and stick to one goal without distractionc, can do this by 
-                        chgarting down ideas with your group and all agreeing on the ones you want to focus on
+            Mitigation strategies: Be orhanbized and stick to one goal without distractionc, can do this by 
+            chgarting down ideas with your group and all agreeing on the ones you want to focus on
 
 
-2. Risk #2- Database integrity- 
+2. Risk #2: Database integrity and reliablity- data inconsistencies like duplicate movie entries, broken links to APIs,
+            or corrupted user profiles. 
 
-3. Risk #3- Conflicting ideas/communication
+            Severity: medium to high severity, can cause user trust issues and can hinder the performance of the app
 
+            Mitigation strategies: Can use test data during development to make sure everything works. Implement error handling
+            and transaction rollbacks for write operations. Could also regularly conduct integrity tests.
+
+
+3. Risk #3: Conflicting ideas/communication-Team members might have different visions for UI design or backend implementation, leading to misunderstandings and delays.
+            
+            Severity: medium, can slow down the project and cause confusion of the overall goal of the project.
+
+            Mitigation strategies: Hold weekly meetings to come to union and also straighten priorities. COuld assign a 
+            well experienced group leader who has final sya if consensus isn't reached. The team can also create a shared project
+            roadmap which will keep everyone on the same page. 
+
+4. Risk #4: Security and privacy leaks- User data could get exposed due to weak security and vulnerablities in our project.
+
+            Severity: High, can lead to data breach, loss of users, and even legal issues. 
+
+            Mitigation strategies: We could regularly update dependencies to fix known vulnarabilities. If we really wanted to test this risk out, 
+            we can test during devlopment and also do pentration tests and then depending on those results we can fix those certain areas that are vulnerable.
+
+
+5. Risk #5: Time managment and deadline pressure- a possible risk could be underestimating the time needed to do things like design, code, and debug.
+            This can lead to last minute rushing which can lead to stress, poor development, etc.
+
+            Severity: medium to high, this can lead poor project devlelop and even result in not finishing your project by the deadline(which in some cases can get you fired).
+
+            Mitigation strategies: break up the project into smaller pieces, kind of like what we did in this lab. We created a wire frame whihc we will use
+            throughout the project. We can also conduct weekly meeting in whihc everyone in the team can tell the others about the progress they have made 
+            and then make sure everything is on track to finish by the deadline.  Also keeping a imaginary deadline which is a few days before the deadline would be 
+            a good strategy so that we can have time for debugguing and last final touches. 
+            
