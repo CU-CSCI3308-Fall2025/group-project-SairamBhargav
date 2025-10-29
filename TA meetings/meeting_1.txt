@@ -11,6 +11,7 @@ Main features:
 -liked bank of movies
 -maybe some Ai involved 
 -login page
+-sessions with other people?
 
 Data:
 -we are getting movies from an open API source, this will be list of movies, genre, time length, etc
