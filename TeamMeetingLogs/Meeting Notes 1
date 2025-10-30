@@ -2,39 +2,39 @@ Meeting 1 Notes
 October 23, 2025
 
 Team Number: 011-4
-Team Name: 
-	CineMates
-	
+Team Name:
+CineMates
 Team Members: Charlie Guo, Ryan Fayock, Neville Jijina, Aswaanth Karuppasamy, Karson Kelley, Bhargav Sairam.
 
+<<<<<<< HEAD
 Application Name: 
 	StackFlix!
 	
+=======
+Application Name:
+MatchFlix!
+>>>>>>> 7c70ef995a4b60b15f8a73888be963ae95f3ec72
 Application Description:
-	Unlike other movie rating aggregator sites like Rotten Tomato and IMDb, MatchFlix will be focused on the social aspects of being a movie goer. Our primary distinction from the others will be a feature that allows users to find others with similar movie tastes so they can enjoy a movie together.
-	
+Unlike other movie rating aggregator sites like Rotten Tomato and IMDb, MatchFlix will be focused on the social aspects of being a movie goer. Our primary distinction from the others will be a feature that allows users to find others with similar movie tastes so they can enjoy a movie together.
 Audience
-	Anyone who likes movies (most people).
-	
+Anyone who likes movies (most people).
 Vision Statment
-	For all movie lovers, who are perpetually lonely and looking for people with similar tastes. MatchFlix is an app that will connect them to the people they look for. Unlike IMDb and others, we will not have a bunch of uptight critics emotionlessly judging the movies, our product will actually have a social aspect to our service.
+For all movie lovers, who are perpetually lonely and looking for people with similar tastes. MatchFlix is an app that will connect them to the people they look for. Unlike IMDb and others, we will not have a bunch of uptight critics emotionlessly judging the movies, our product will actually have a social aspect to our service.
 
-Version Control: 
-	Repository Organization Done.
+Version Control:
+Repository Organization Done.
 
 Development Methodology:
-	We will use the Agile Methodology.
-	
-Communication Plan: 
-	Discord for general communications and voice calls
-	Lucid Charts and maybe GitHub Project Board for tasks and scheduling
+We will use the Agile Methodology.
+Communication Plan:
+Discord for general communications and voice calls
+Lucid Charts and maybe GitHub Project Board for tasks and scheduling
 
 Meeting plan
-	Team meetings: right before our TA meeting: Tuesdays at 10:30 am in CSEL, and other meetings are possible via VC in discord if needed.
-	Weekly Meeting with TA: Tuesdays 11:00am in ECCS 114F
+Team meetings: right before our TA meeting: Tuesdays at 10:30 am in CSEL, and other meetings are possible via VC in discord if needed.
+Weekly Meeting with TA: Tuesdays 11:00am in ECCS 114F
 
 Use Case Diagram
-	Made on FlowCharts
-	
+Made on FlowCharts
 Wireframes
-	Will be made on FlowCharts
+Will be made on figma
