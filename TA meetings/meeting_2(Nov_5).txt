@@ -1,0 +1,14 @@
+Meet with TA- 11/4/25
+Scribe: Aswaanth Karuppasamy
+
+Description: Ava made each of go over what we had did since the last time we had met.
+            None of us had started any real code yet, we all had a solid foundation of what our
+            individual tasks were. TA emphasized that we needed some working code and layout of our project
+            by the next meeting. Each person must have 3 commits and also try to write comments to keep
+            everything organized. Also when workong on it move it from ice box into the progress/working section.
+
+
+            TO DO by 11/11:
+            -Everyone has something done in terms of code from their designated tasks, should be basic and working
+            -Each person has 3 commits
+            -Able to explain what they have done at the next meeting.
