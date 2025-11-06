@@ -6,8 +6,14 @@ Team Name:
 CineMates
 Team Members: Charlie Guo, Ryan Fayock, Neville Jijina, Aswaanth Karuppasamy, Karson Kelley, Bhargav Sairam.
 
+<<<<<<< HEAD
+Application Name: 
+	StackFlix!
+	
+=======
 Application Name:
 MatchFlix!
+>>>>>>> 7c70ef995a4b60b15f8a73888be963ae95f3ec72
 Application Description:
 Unlike other movie rating aggregator sites like Rotten Tomato and IMDb, MatchFlix will be focused on the social aspects of being a movie goer. Our primary distinction from the others will be a feature that allows users to find others with similar movie tastes so they can enjoy a movie together.
 Audience
