@@ -1,6 +1,36 @@
-ProjectSourceCode
+ProjectSourceCode:
+├─ ProjectSourceCode
+|   ├─ docker-compose.yaml
+|   ├─ .gitignore
+|   ├─ node_modules
+|   ├─ package.json
+|   ├─ src
+|      ├─ views
+|         ├─ pages
+|             ├─ home.hbs
+|             ├─ login.hbs
+|             ├─ register.hbs
+|         ├─ partials
+|             ├─ header.hbs
+|             ├─ footer.hbs
+|         ├─ layouts
+|             ├─ main.hbs
+|      ├─ resources
+|         ├─ css
+|             ├─ style.css
+|         ├─ js
+|             ├─ script.js
+|         ├─ img
+|             ├─ home.png
+|      ├─ index.js
+|      ├─ init_data
+|         ├─ create.sql
+|         ├─ insert.sql
+|   ├─ test
+|         ├─ server.spec.js
+
 	
-MilestoneSubmissions
+MilestoneSubmissions:
 
 
 
