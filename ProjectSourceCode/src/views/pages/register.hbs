@@ -4,88 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(120deg, #74ABE2, #a5acf1);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0;
-    }
 
-    .register-container {
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      padding: 35px 40px;
-      width: 360px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 25px;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-      color: #444;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="date"] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      font-size: 1rem;
-    }
-
-    button {
-      width: 100%;
-      background-color: #5563DE;
-      color: white;
-      border: none;
-      padding: 12px;
-      font-size: 1rem;
-      border-radius: 6px;
-      margin-top: 20px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #3946b3;
-    }
-
-    .username-suggestion {
-      font-style: italic;
-      color: #666;
-      margin-top: 5px;
-    }
-
-    p {
-      text-align: center;
-      margin-top: 15px;
-    }
-
-    a {
-      color: #5563DE;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <!-- Link external CSS -->
+  <link rel="stylesheet" href="/css/register.css">
 </head>
 <body>
   <div class="register-container">
@@ -101,16 +22,16 @@
 
     <form action="/register" method="POST">
       <label for="fname">First Name</label>
-      <input type="text" id="fname" name="fname" placeholder="Enter your first name" value="{{fname}}" required>
+      <input type="text" id="fname" name="fname" placeholder="Enter your first name" required>
 
       <label for="lname">Last Name</label>
-      <input type="text" id="lname" name="lname" placeholder="Enter your last name" value="{{lname}}" required>
+      <input type="text" id="lname" name="lname" placeholder="Enter your last name" required>
 
       <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="Enter your email" value="{{email}}" required>
+      <input type="email" id="email" name="email" placeholder="Enter your email" required>
 
       <label for="birthday">Birthday</label>
-      <input type="date" id="birthday" name="birthday" value="{{birthday}}" required>
+      <input type="date" id="birthday" name="birthday" required>
 
       <label for="username">Username (Recommended)</label>
       <input type="text" id="username" name="username" placeholder="Suggested username will appear here" required>
@@ -125,39 +46,7 @@
     </form>
   </div>
 
-  <script>
-    // Elements
-    const fname = document.getElementById('fname');
-    const lname = document.getElementById('lname');
-    const birthday = document.getElementById('birthday');
-    const usernameInput = document.getElementById('username');
-    const suggestion = document.getElementById('suggestion');
-
-    // Generate username suggestion dynamically
-    function suggestUsername() {
-      const first = fname.value.trim().toLowerCase();
-      const last = lname.value.trim().toLowerCase();
-      const bday = birthday.value;
-
-      if (first && last && bday) {
-        const year = new Date(bday).getFullYear().toString().slice(-2);
-        const month = (new Date(bday).getMonth() + 1).toString().padStart(2, '0');
-        const suggestionText = `${first}.${last}${year}${month}`;
-        usernameInput.value = suggestionText;
-        suggestion.textContent = `Suggested: ${suggestionText}`;
-      } else if (first && last) {
-        const suggestionText = `${first}_${last}`;
-        usernameInput.value = suggestionText;
-        suggestion.textContent = `Suggested: ${suggestionText}`;
-      } else {
-        suggestion.textContent = '';
-      }
-    }
-
-    // Listen to input events
-    fname.addEventListener('input', suggestUsername);
-    lname.addEventListener('input', suggestUsername);
-    birthday.addEventListener('change', suggestUsername);
-  </script>
+  <!-- Link external JavaScript -->
+  <script src="/index.js"></script>
 </body>
 </html>
