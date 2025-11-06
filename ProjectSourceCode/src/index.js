@@ -53,15 +53,15 @@ const hbs = handlebars.create({
   partialsDir: __dirname + '/views/partials',
 });
 
-// const dbConfig = {
-//   host: 'db', // the database server
-//   port: 5432, // the database port
-//   database: process.env.POSTGRES_DB, // the database name
-//   user: process.env.POSTGRES_USER, // the user account to connect with
-//   password: process.env.POSTGRES_PASSWORD, // the password of the user account
-// };
+const dbConfig = {
+  host: 'db', // the database server
+  port: 5432, // the database port
+  database: process.env.POSTGRES_DB, // the database name
+  user: process.env.POSTGRES_USER, // the user account to connect with
+  password: process.env.POSTGRES_PASSWORD, // the password of the user account
+};
 
-// const db = pgp(dbConfig);
+const db = pgp(dbConfig);
 
 
 // test your database
@@ -95,3 +95,57 @@ app.use(
     extended: true,
   })
 );
+
+
+
+// *****************************************************
+// <!-- Section 4 : API Routes -->
+// *****************************************************
+
+// TODO - Include your API routes here
+
+
+  app.get('/login', (req, res) => {
+      res.render('pages/login')
+  })
+
+  app.post('/login', async (req, res) =>{
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const query = 'SELECT * FROM users WHERE username = $1';
+    const user = await db.oneOrNone(query, [username]);
+
+    if(!user){
+      return res.redirect('/register')
+    }
+
+
+    const match = await bcrypt.compare(req.body.password, user.password);
+
+    if(!match){
+      res.render('pages/login', {message: 'Incorrect username or password'})
+    }
+    
+    req.session.user = user;
+    req.session.save(err => {
+      if(err){
+        return res.render('pages/login', {message: 'Something went wrong try again', error:true})
+      }
+      res.redirect('/discover')
+    });
+
+    
+  })
+
+  // Authentication Middleware.
+  const auth = (req, res, next) => {
+    if (!req.session.user) {
+      // Default to login page.
+      return res.redirect('/login');
+    }
+    next();
+  };
+
+  // Authentication Required
+  app.use(auth);
