@@ -162,6 +162,47 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Discover page - shows movies from TMDB
+app.get("/discover", auth, async (req, res) => {
+  try {
+    // Fetch popular movies from TMDB
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/discover/movie`,
+      {
+        params: {
+          api_key: process.env.TMDB_API_KEY,
+          sort_by: "popularity.desc",
+          language: "en-US",
+          page: 1,
+          include_adult: false,
+        },
+      }
+    );
+
+    const movies = response.data.results.map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+      overview: movie.overview,
+      posterPath: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null,
+      releaseDate: movie.release_date,
+      rating: movie.vote_average,
+    }));
+
+    res.render("pages/discover", {
+      movies: movies,
+      username: req.session.username,
+    });
+  } catch (err) {
+    console.error("Error fetching movies:", err.message);
+    res.render("pages/discover", {
+      movies: [],
+      error: "Failed to load movies",
+    });
+  }
+});
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
