@@ -1,0 +1,13 @@
+Tasks Started:
+login page
+register page
+linked bank page
+nav bar
+
+Team agreed to meet after lab on thrusday every week on project. Functionality for login page, register page, and initial navbar setup will be completed 11/11.
+
+Charlie: Worked on liked page -> HTML, Rendering and will complete
+Aswanth: Worked on resgister.hbs, fished and tested -> going to work on index.js functionality
+Neville: Worked on login.hbs, needs to test it with index.js
+Ryan: navbar functionality
+Bhargav: database setup for (SQL) register page, register.hbs and index.js config

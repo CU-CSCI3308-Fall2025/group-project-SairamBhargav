@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center vh-100 align-items-center flex-column">
+        <h2 class="mb-4">Login</h2>
+
+        {{!-- https://www.w3schools.com/howto/howto_css_register_form.asp --}}
+        <form action="/login" method="POST" style="width: 600px; background-color:white;">
+
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="color: #b197fc;">Login</button>
+        </form>
+    </div>
+</body>
+
+</html>

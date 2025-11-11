@@ -1,0 +1,58 @@
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f8f9fa;">
+  <div class="card shadow-lg p-4" style="width: 400px; border-radius: 16px;">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold">
+        🎬 MatchFlix
+      </h3>
+      <p class="text-muted mb-0">
+        Create an account to discover movies you love
+      </p>
+    </div>
+
+    {{#if message}}
+      <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center" role="alert">
+        {{message}}
+      </div>
+    {{/if}}
+
+    <form action="/register" method="POST">
+           <div class="mb-3">
+      <label for="firstName" class="form-label">First Name</label>
+      <input type="text" class="form-control" name="firstName" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="lastName" class="form-label">Last Name</label>
+      <input type="text" class="form-control" name="lastName" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" class="form-control" name="email" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="dateOfBirth" class="form-label">Date of Birth</label>
+      <input type="date" class="form-control" name="dateOfBirth" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="username" class="form-label fw-semibold">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label fw-semibold">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #000022;">Create Account</button>
+    </form>
+
+    <div class="text-center mt-3">
+      <small class="text-muted">
+        Already have an account? <a href="/login" class="text-primary fw-semibold text-decoration-none">Sign in</a>
+      </small>
+    </div>
+  </div>
+</div>
