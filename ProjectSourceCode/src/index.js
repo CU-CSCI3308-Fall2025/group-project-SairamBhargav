@@ -149,3 +149,74 @@ app.use(
 
   // Authentication Required
   app.use(auth);
+
+
+  // --- PROFILE ROUTE ---
+app.get("/profile", async (req, res) => {
+  const username = req.session.username; // or however you store the logged-in user
+
+  if (!username) {
+    // Not logged in
+    return res.redirect("/login");
+  }
+
+  try {
+    // --- Get total liked movies ---
+    const totalLiked = await db.query(
+      "SELECT COUNT(*) FROM liked_movies WHERE username = $1",
+      [username]
+    );
+
+    // --- Get most liked genre ---
+    const topGenre = await db.query(`
+      SELECT genre FROM liked_movies
+      WHERE username = $1
+      GROUP BY genre
+      ORDER BY COUNT(*) DESC
+      LIMIT 1
+    `, [username]);
+
+    // --- Get most liked actor ---
+    const topActor = await db.query(`
+      SELECT actor FROM liked_movies
+      WHERE username = $1
+      GROUP BY actor
+      ORDER BY COUNT(*) DESC
+      LIMIT 1
+    `, [username]);
+
+    // --- Get most liked actress ---
+    const topActress = await db.query(`
+      SELECT actress FROM liked_movies
+      WHERE username = $1
+      GROUP BY actress
+      ORDER BY COUNT(*) DESC
+      LIMIT 1
+    `, [username]);
+
+    // --- Render the profile page ---
+    res.render("profile", {
+      user: { username },
+      stats: {
+        totalLiked: totalLiked.rows[0]?.count || 0,
+        topGenre: topGenre.rows[0]?.genre || "N/A",
+        topActor: topActor.rows[0]?.actor || "N/A",
+        topActress: topActress.rows[0]?.actress || "N/A",
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.render("profile", {
+      user: { username },
+      stats: {
+        totalLiked: 0,
+        topGenre: "N/A",
+        topActor: "N/A",
+        topActress: "N/A",
+      },
+      message: "Error loading profile data",
+      error: true,
+    });
+  }
+});
+
