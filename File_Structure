@@ -10,6 +10,9 @@ ProjectSourceCode:
 |             ├─ home.hbs
 |             ├─ login.hbs
 |             ├─ register.hbs
+|             ├─ discover.hbs
+|             ├─ swipe.hbs
+|             ├─ profile.hbs
 |         ├─ partials
 |             ├─ header.hbs
 |             ├─ footer.hbs

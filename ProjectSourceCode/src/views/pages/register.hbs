@@ -1,53 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register</title>
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f8f9fa;">
+  <div class="card shadow-lg p-4" style="width: 400px; border-radius: 16px;">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold">
+        🎬 MatchFlix
+      </h3>
+      <p class="text-muted mb-0">
+        Create an account to discover movies you love
+      </p>
+    </div>
 
-  <!-- Link external CSS -->
-  <link rel="stylesheet" href="/css/register.css">
-</head>
-<body>
-  <div class="register-container">
-    <h2>Create an Account</h2>
-
-    {{#if error}}
-      <div class="error">{{error}}</div>
-    {{/if}}
-
-    {{#if success}}
-      <div class="success">{{success}}</div>
+    {{#if message}}
+      <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center" role="alert">
+        {{message}}
+      </div>
     {{/if}}
 
     <form action="/register" method="POST">
-      <label for="fname">First Name</label>
-      <input type="text" id="fname" name="fname" placeholder="Enter your first name" required>
+           <div class="mb-3">
+      <label for="firstName" class="form-label">First Name</label>
+      <input type="text" class="form-control" name="firstName" required>
+    </div>
 
-      <label for="lname">Last Name</label>
-      <input type="text" id="lname" name="lname" placeholder="Enter your last name" required>
+    <div class="mb-3">
+      <label for="lastName" class="form-label">Last Name</label>
+      <input type="text" class="form-control" name="lastName" required>
+    </div>
 
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="Enter your email" required>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" class="form-control" name="email" required>
+    </div>
 
-      <label for="birthday">Birthday</label>
-      <input type="date" id="birthday" name="birthday" required>
+    <div class="mb-3">
+      <label for="dateOfBirth" class="form-label">Date of Birth</label>
+      <input type="date" class="form-control" name="dateOfBirth" required>
+    </div>
 
-      <label for="username">Username (Recommended)</label>
-      <input type="text" id="username" name="username" placeholder="Suggested username will appear here" required>
-      <div class="username-suggestion" id="suggestion"></div>
+    <div class="mb-3">
+        <label for="username" class="form-label fw-semibold">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
 
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" placeholder="Create a password" required>
+      <div class="mb-3">
+        <label for="password" class="form-label fw-semibold">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+      </div>
 
-      <button type="submit">Register</button>
-
-      <p>Already have an account? <a href="/login">Login here</a></p>
+      <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #000022;">Create Account</button>
     </form>
-  </div>
 
-  <!-- Link external JavaScript -->
-  <script src="/index\
-  .js"></script>
-</body>
-</html>
+    <div class="text-center mt-3">
+      <small class="text-muted">
+        Already have an account? <a href="/login" class="text-primary fw-semibold text-decoration-none">Sign in</a>
+      </small>
+    </div>
+  </div>
+</div>
