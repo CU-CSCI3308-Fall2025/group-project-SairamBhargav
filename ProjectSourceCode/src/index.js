@@ -1,31 +1,123 @@
-// ********************** Initialize server **********************************
+//================================From Lab 7==================================
 
-const server = require("../index"); //TODO: Make sure the path to your index.js is correctly added
+// *****************************************************
+// <!-- Section 1 : Import Dependencies -->
+// *****************************************************
 
-// ********************** Import Libraries ***********************************
+const express = require('express'); // To build an application server or API
+const app = express();
+const handlebars = require('express-handlebars');
+const Handlebars = require('handlebars');
+const path = require('path');
+const pgp = require('pg-promise')(); // To connect to the Postgres DB from the node server
+const bodyParser = require('body-parser');
+const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
+const bcrypt = require('bcryptjs'); //  To hash passwords
+const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part C.
 
-const chai = require("chai"); // Chai HTTP provides an interface for live integration testing of the API's.
-const chaiHttp = require("chai-http");
-chai.should();
-chai.use(chaiHttp);
-const { assert, expect } = chai;
+// *****************************************************
+// <!-- Section 2 : Connect to DB -->
+// *****************************************************
 
-// ********************** DEFAULT WELCOME TESTCASE ****************************
-
-describe("Server!", () => {
-  // Sample test case given to test / endpoint.
-  it("Returns the default welcome message", (done) => {
-    chai
-      .request(server)
-      .get("/welcome")
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.status).to.equals("success");
-        assert.strictEqual(res.body.message, "Welcome!");
-        done();
-      });
-  });
+// create `ExpressHandlebars` instance and configure the layouts and partials dir.
+const hbs = handlebars.create({
+  extname: 'hbs',
+  layoutsDir: __dirname + '/views/layouts',
+  partialsDir: __dirname + '/views/partials',
+  //add Dir for CSS if have one
 });
+
+// database configuration
+const dbConfig = {
+  host: 'db', // the database server
+  port: 5432, // the database port
+  database: process.env.POSTGRES_DB, // the database name
+  user: process.env.POSTGRES_USER, // the user account to connect with
+  password: process.env.POSTGRES_PASSWORD, // the password of the user account
+};
+
+const db = pgp(dbConfig);
+
+// test your database
+db.connect()
+  .then(obj => {
+    console.log('Database connection successful'); // you can view this message in the docker compose logs
+    obj.done(); // success, release the connection;
+  })
+  .catch(error => {
+    console.log('ERROR:', error.message || error);
+  });
+
+// *****************************************************
+// <!-- Section 3 : App Settings -->
+// *****************************************************
+
+// Register `hbs` as our view engine using its bound `engine()` function.
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
+
+// initialize session variables
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
+    resave: false,
+  })
+);
+
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
+
+// Authentication Middleware from Lab 7.
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login'); // You must log in before going to discover and log out, otherwise it will redirect to log in
+  }
+  next();
+};
+
+// Authentication Required
+app.use(auth);
+
+app.get('/liked', async (req,res) => {
+
+  const query = `
+    SELECT *
+    FROM users u
+    INNER JOIN users_to_liked u2l
+      ON u.user_id = u2l.user_id
+    INNER JOIN movies m
+      ON u2l.movie_id = m.movie id
+    WHERE u.username = $1
+  `;
+
+  const username = req.session.user.username;
+
+  try{
+
+    const likedMoviesDB = await db.any(query, [username]);
+
+    const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
+      user_ID: movie.user_ID,
+      movie_ID: movie.movie_ID
+    }));
+    const likedLen = likedMovies.length;
+
+    res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
+  }
+  catch (err){
+    console.log(err);
+    res.render("pages/liked", {message: err});
+  }
+
+  res.render("/pages/liked");
+})
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
 
