@@ -104,8 +104,11 @@ app.get('/liked', async (req,res) => {
     const likedMoviesDB = await db.any(query, [username]);
 
     const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
-      user_ID: movie.user_ID,
-      movie_ID: movie.movie_ID
+      name: movie.name,
+      poster_url: movie.poster_url,
+      review: movie.review,
+      year_of_release: movie.year_of_release,
+      genre: movie.genre
     }));
     const likedLen = likedMovies.length;
 
