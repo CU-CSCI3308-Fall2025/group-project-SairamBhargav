@@ -199,6 +199,9 @@ app.get("/discover", auth, async (req, res) => {
     res.render("pages/discover", {
       movies: [],
       error: "Failed to load movies",
+      });
+  }
+});
   // Authentication Required
   app.use(auth);
 
