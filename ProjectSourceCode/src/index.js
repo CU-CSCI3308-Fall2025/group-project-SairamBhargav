@@ -250,7 +250,7 @@ app.get("/profile", async (req, res) => {
     `, [username]);
 
     // --- Render the profile page ---
-    res.render("profile", {
+    res.render("pages/profile", {
       user: { username },
       stats: {
         totalLiked: totalLiked.rows[0]?.count || 0,
@@ -261,7 +261,7 @@ app.get("/profile", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.render("profile", {
+    res.render("pages/profile", {
       user: { username },
       stats: {
         totalLiked: 0,

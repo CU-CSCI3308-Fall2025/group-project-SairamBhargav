@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{user.username}}'s Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body style="background-color: #f8f9fa;">
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg p-4 text-center" style="width: 420px; border-radius: 16px;">
+      <h3 class="fw-bold mb-2">🎬 MatchFlix Profile</h3>
+      <p class="text-muted mb-4">Welcome back, {{user.username}}!</p>
+
+      {{#if message}}
+        <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center" role="alert">
+          {{message}}
+        </div>
+      {{/if}}
+
+      <div class="mb-3">
+        <h6 class="fw-bold">🎥 Total Liked Movies</h6>
+        <p class="fs-5 text-primary mb-0">{{stats.totalLiked}}</p>
+      </div>
+
+      <div class="mb-3">
+        <h6 class="fw-bold">🎭 Most Liked Genre</h6>
+        <p class="fs-5 text-success mb-0">{{stats.topGenre}}</p>
+      </div>
+
+      <div class="mb-3">
+        <h6 class="fw-bold">👨‍🎤 Favorite Actor</h6>
+        <p class="fs-5 text-warning mb-0">{{stats.topActor}}</p>
+      </div>
+
+      <div class="mb-3">
+        <h6 class="fw-bold">👩‍🎤 Favorite Actress</h6>
+        <p class="fs-5 text-danger mb-0">{{stats.topActress}}</p>
+      </div>
+
+      <hr>
+      <a href="/logout" class="btn btn-outline-dark w-100 fw-semibold mt-2">Log Out</a>
+    </div>
+  </div>
+</body>
+</html>
