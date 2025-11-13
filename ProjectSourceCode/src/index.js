@@ -108,11 +108,20 @@ app.post("/register", async (req, res) => {
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Minimum password length, must be 8 characters mimimum
+  if (password.length < 8) {
+    return res.render("pages/register", {
+      message: "Registration failed. Password must be at least 8 characters.",
+      error: true,
+    });
+  }
+
     // insert user into database
     await db.none(
       `INSERT INTO users (username, password, firstName, lastName, email, dateOfBirth)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [username, hashedPassword, firstName, lastName, email, dateOfBirth]
+
     );
 
     res.render("pages/register", {

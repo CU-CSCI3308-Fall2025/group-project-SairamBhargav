@@ -1,0 +1,18 @@
+Meeting Notes
+  Bhargav
+    Got register page fully working and running using a post method
+    Plan for next week: Help with the search bar and get movie recommendation algorithm working
+  Ryan
+    Made a skeleton of the navbar and needs to edit it to make it fit the rest of the pages
+    Plan for next week: Get navbar up and working and start on swipe page
+  Karson
+    Got the discover page up and running with api key from TMBD
+    Plan for next week: Cleaning up discover page and adding a watchlist/liked button on the discover page, also making new tables
+  Charlie
+    Has been working on the liked bank page and editing it based on the users liked movies, trying to get it up and running
+    Plan for next week: Get a fully working liked bank page going
+  Neville
+    Finished login page and needs to get started on the swipe page
+    Plan for next week: Get swipe page front end working
+  Aswaanth
+    Finished the front end of the profile page, needs to work on pulling favorite actor from liked movie database, also need to work on 
