@@ -312,40 +312,36 @@ app.get("/profile", async (req, res) => {
 
 app.get('/liked', async (req,res) => {
 
-  // This block is currently commented out beacuse the database is not yet set up for liked and watchlist functionalities.
+  const query = `
+    SELECT u.username, l.movie_id
+    FROM users u
+    INNER JOIN liked_movies l
+      ON u.username = l.username
+    WHERE u.username = $1
+  `;
 
-  // const query = `
-  //   SELECT *
-  //   FROM users u
-  //   INNER JOIN users_to_liked u2l
-  //     ON u.user_id = u2l.user_id
-  //   INNER JOIN movies m
-  //     ON u2l.movie_id = m.movie id
-  //   WHERE u.username = $1
-  // `;
+  const username = req.session.username;
 
-  // const username = req.session.user.username;
+  try{
 
-  // try{
+    const likedMoviesDB = await db.any(query, [username]);
 
-  //   const likedMoviesDB = await db.any(query, [username]);
+    const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
+      name: movie.name,
+      poster_url: movie.poster_url,
+      review: movie.review,
+      year_of_release: movie.year_of_release,
+      genre: movie.genre,
+      isBad: (movie.review < 5)
+    }));
+    const likedLen = likedMovies.length;
 
-  //   const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
-  //     name: movie.name,
-  //     poster_url: movie.poster_url,
-  //     review: movie.review,
-  //     year_of_release: movie.year_of_release,
-  //     genre: movie.genre
-  //     isBad: (movie.review < 5)
-  //   }));
-  //   const likedLen = likedMovies.length;
-
-  //   res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
-  // }
-  // catch (err){
-  //   console.log(err);
-  //   res.render("pages/liked", {message: err});
-  // }
+    res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
+  }
+  catch (err){
+    console.log(err);
+    res.render("pages/liked", {message: err});
+  }
 
   res.render("pages/liked");
 })
