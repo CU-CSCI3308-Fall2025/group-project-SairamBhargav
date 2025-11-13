@@ -85,6 +85,10 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // TODO - Include your API routes here
 //this is so to direct the user to the login page or discovery page depending on whether they are logged in
+app.get("/welcome", (req, res) => {
+  res.json({ status: "success", message: "Welcome!" });
+});
+
 app.get("/", (req, res) => {
   if (req.session.user) {
     res.redirect("/discover");
@@ -279,5 +283,5 @@ app.get("/profile", async (req, res) => {
 // <!-- Section 5 : Start Server-->
 // *****************************************************
 // starting the server and keeping the connection open to listen for more requests
-app.listen(3000);
+module.exports = app.listen(3000);
 console.log("Server is listening on port 3000");
