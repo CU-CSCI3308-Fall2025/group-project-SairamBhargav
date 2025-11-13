@@ -70,57 +70,6 @@ app.use(
   })
 );
 
-// Authentication Required
-app.use(auth);
-
-app.get('/liked', async (req,res) => {
-
-  const query = `
-    SELECT *
-    FROM users u
-    INNER JOIN users_to_liked u2l
-      ON u.user_id = u2l.user_id
-    INNER JOIN movies m
-      ON u2l.movie_id = m.movie id
-    WHERE u.username = $1
-  `;
-
-  const username = req.session.user.username;
-
-  try{
-
-    const likedMoviesDB = await db.any(query, [username]);
-
-    const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
-      name: movie.name,
-      poster_url: movie.poster_url,
-      review: movie.review,
-      year_of_release: movie.year_of_release,
-      genre: movie.genre
-    }));
-    const likedLen = likedMovies.length;
-
-    res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
-  }
-  catch (err){
-    console.log(err);
-    res.render("pages/liked", {message: err});
-  }
-
-  res.render("/pages/liked");
-})
-
-// *********************** TODO: WRITE 2 UNIT TESTCASES **************************
-
-// test your database
-db.connect()
-  .then((obj) => {
-    console.log("Database connection successful"); // you can view this message in the docker compose logs
-    obj.done(); // success, release the connection;
-  })
-  .catch((error) => {
-    console.log("ERROR:", error.message || error);
-  });
 
 // *****************************************************
 // <!-- Section 3 : App Settings -->
@@ -146,10 +95,11 @@ app.use(
   })
 );
 
-// Authentication Middleware
+// Authentication Middleware.
 const auth = (req, res, next) => {
-  if (!req.session.username) {
-    return res.redirect("/login");
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login'); // You must log in before going to discover and log out, otherwise it will redirect to log in
   }
   next();
 };
@@ -352,9 +302,46 @@ app.get("/profile", async (req, res) => {
   }
 });
 
+app.get('/liked', async (req,res) => {
+
+  const query = `
+    SELECT *
+    FROM users u
+    INNER JOIN users_to_liked u2l
+      ON u.user_id = u2l.user_id
+    INNER JOIN movies m
+      ON u2l.movie_id = m.movie id
+    WHERE u.username = $1
+  `;
+
+  const username = req.session.user.username;
+
+  try{
+
+    const likedMoviesDB = await db.any(query, [username]);
+
+    const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
+      name: movie.name,
+      poster_url: movie.poster_url,
+      review: movie.review,
+      year_of_release: movie.year_of_release,
+      genre: movie.genre
+    }));
+    const likedLen = likedMovies.length;
+
+    res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
+  }
+  catch (err){
+    console.log(err);
+    res.render("pages/liked", {message: err});
+  }
+
+  res.render("/pages/liked");
+})
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
 // starting the server and keeping the connection open to listen for more requests
-app.listen(3000);
+module.exports = app.listen(3000);
 console.log("Server is listening on port 3000");
