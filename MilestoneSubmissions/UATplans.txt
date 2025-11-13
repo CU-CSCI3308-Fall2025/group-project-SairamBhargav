@@ -1,41 +1,48 @@
 Registration Page
-Test Cases:
-  Username:abc
-  Password: 123
-  First Name: Homer
-  Last Name: Simpson
-  Email: email@gmail.com
-  Date of Birth: 01/01/2000
+  Test Scenario
+    User is redirected to login page after registration
+    Test Cases:
+    Username:abc
+    Password: 123
+    First Name: Homer
+    Last Name: Simpson
+    Email: email@gmail.com
+    Date of Birth: 01/01/2000
 
-Test Environment:
-  To test our login page direct yourself to http://localhost:3000/register
-Test Results:
-  When a user successfully register’s it will direct them to the login page. If they do not enter a valid username, password, first name, last name, email, and DOB then they will be prompted with an error message. 
-Testers:
-  2 team members, 2 team members who are not the primary developers of the registration feature. Ideally, one technical user and one non-technical user to simulate real user behavior. Will check different variations of complete and incomplete fields. 
+  Test Environment:
+    To test our login page direct yourself to http://localhost:3000/register
+    Expected Test Results:
+      When a user successfully register’s it will direct them to the login page. If they do not enter a valid username, password, first name, last name, email, and DOB then        they will be prompted with an error message. 
+
+  Testers:
+    2 team members, 2 team members who are not the primary developers of the registration feature. Ideally, one technical user and one non-technical user to simulate real        user   behavior. Will check different variations of complete and incomplete fields. 
 
 Login Page
-Test Cases
-Username: abc
-  Password: 123
-Test environment
-  To test our login page direct yourself to http://localhost:3000/login
-Test Results
-  When user enters a correct username and password it will redirect them to the discover page, if they don’t enter a correct password or username then login page refreshes
-Testers
-  2 team members who did not make the login page can access the login page after registering to make sure they can enter a proper username and password and be redirected the the discover page
-Test Results
-  User was able to login based off of registered username and password and was redirected to discover page
+  Test Scenario
+    When user enters a correct username and password redirect them to the discover page
+  Test Case
+    Username: abc
+    Password: 123
+  Test environment
+    To test our login page direct yourself to http://localhost:3000/login
+
+  Testers
+    2 team members who did not make the login page can access the login page after registering to make sure they can enter a proper username and password and be redirected       the discover page
+
+  Expected Test Results
+    User was able to login based off of registered username and password and was redirected to the discover page. If info is wrong, they will receive a login error
 
 Movie Discover Page
-Test cases
-Test Data
-  Logged-in user:** Any registered user with valid session
-  - **API:** TMDB API (requires valid API key in .env file)
-  - **Expected movie count:** At least 10-20 popular movies
-Test Environment
-  Local Host (https://localhost:3000)
-Testers:
-  2 team members, who didn’t develop the discover page can properly browse it and explore the movie catalog
-Test Results
-  The user logs into their account and is directed to the discover page immediately, the page shows movies with names, image of posters, rating, and genre, and they are displayed in an orderly and well designed manner.
+  Test Scenario
+    User can browse the discover page to see a list of several movies, their rating, and description
+  Test Case
+    Logged in user
+    Logged-in user: Any registered user with valid session
+    API: TMDB API (requires valid API key in .env file)
+    Expected movie count: At least 10-20 popular movies
+  Test Environment
+    Local Host (https://localhost:3000)
+  Testers:
+    2 team members, who didn’t develop the discover page can properly browse it and explore the movie catalog
+  Expected Test Results
+    The user logs into their account and is directed to the discover page immediately, the page shows movies with names, image of posters, rating, and genre, and they are        displayed in an orderly and well designed manner.
