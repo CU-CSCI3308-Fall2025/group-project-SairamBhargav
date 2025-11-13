@@ -97,4 +97,27 @@ it("Negative : /register - should reject registration with duplicate username", 
 });
 
 // *******************************************************************************
+//EXTRA CREDIT
+//TEST CASE #3- NEGATIVE TEST CASE FOR password length too short
+
+it("Negative : /register - should fail for a short password", (done) => {
+  chai
+    .request(server)
+    .post("/register")
+    .send({
+      username: "shortpass" + Date.now(),
+      password: "123", // too short
+      firstName: "Test",
+      lastName: "User",
+      email: "shortpass" + Date.now() + "@example.com",
+      dateOfBirth: "2000-01-01"
+    })
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      expect(res).to.be.html;
+      expect(res.text).to.include("Registration failed");
+      expect(res.text).to.include("password");
+      done();
+    });
+});
 
