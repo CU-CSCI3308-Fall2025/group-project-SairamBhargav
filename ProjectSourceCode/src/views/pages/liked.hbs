@@ -1,3 +1,7 @@
+<h1>Liked movies</h1>
+<!--
+This is what the liked page would be, we're working on getting the database set up to handle it.
+
 <h1> Like Movies Bank</h1>
 <h2 style="color: lightgray;"> {{numOFLiked}} movies in your collection </h2>
 
@@ -6,10 +10,11 @@
         <div class="card">
             <h3>{{name}}</h3>
             <img src="{{poster_url}}" alt="{{name}}" width="300">
-            {{#if review < 5}}
+            {{#if isBad}}
                 <span class="badge text-bg-danger">{{review}}</span>
             {{else}}
                 <span class="badge text-bg-success">{{review}}</span>
+            {{/if}}
             <p style="color: lightgray;">{{year_of_release}}</p>
             <span class="badge text-bg-light">{{genre}}</span>
         </div>

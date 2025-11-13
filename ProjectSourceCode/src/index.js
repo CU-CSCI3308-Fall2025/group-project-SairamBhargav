@@ -112,10 +112,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // TODO - Include your API routes here
 //this is so to direct the user to the login page or discovery page depending on whether they are logged in
-app.get("/welcome", (req, res) => {
-  res.json({ status: "success", message: "Welcome!" });
-});
-
 app.get("/", (req, res) => {
   if (req.session.user) {
     res.redirect("/discover");
@@ -184,14 +180,16 @@ app.post("/login", async (req, res) => {
       });
     }
 
+    req.session.user = user;
     req.session.username = user.username;
-
     res.redirect("/discover");
   } catch (err) {
-    console.error(err);
+    console.error("Error: " + err);
     res.render("pages/login", { message: "An error occurred", error: true });
   }
 });
+
+app.use(auth);
 
 // Discover page - shows movies from TMDB
 app.get("/discover", auth, async (req, res) => {
@@ -233,9 +231,6 @@ app.get("/discover", auth, async (req, res) => {
       });
   }
 });
-  // Authentication Required
-  app.use(auth);
-
 
   // --- PROFILE ROUTE ---
 app.get("/profile", async (req, res) => {
@@ -308,39 +303,42 @@ app.get("/profile", async (req, res) => {
 
 app.get('/liked', async (req,res) => {
 
-  const query = `
-    SELECT *
-    FROM users u
-    INNER JOIN users_to_liked u2l
-      ON u.user_id = u2l.user_id
-    INNER JOIN movies m
-      ON u2l.movie_id = m.movie id
-    WHERE u.username = $1
-  `;
+  // This block is currently commented out beacuse the database is not yet set up for liked and watchlist functionalities.
 
-  const username = req.session.user.username;
+  // const query = `
+  //   SELECT *
+  //   FROM users u
+  //   INNER JOIN users_to_liked u2l
+  //     ON u.user_id = u2l.user_id
+  //   INNER JOIN movies m
+  //     ON u2l.movie_id = m.movie id
+  //   WHERE u.username = $1
+  // `;
 
-  try{
+  // const username = req.session.user.username;
 
-    const likedMoviesDB = await db.any(query, [username]);
+  // try{
 
-    const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
-      name: movie.name,
-      poster_url: movie.poster_url,
-      review: movie.review,
-      year_of_release: movie.year_of_release,
-      genre: movie.genre
-    }));
-    const likedLen = likedMovies.length;
+  //   const likedMoviesDB = await db.any(query, [username]);
 
-    res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
-  }
-  catch (err){
-    console.log(err);
-    res.render("pages/liked", {message: err});
-  }
+  //   const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
+  //     name: movie.name,
+  //     poster_url: movie.poster_url,
+  //     review: movie.review,
+  //     year_of_release: movie.year_of_release,
+  //     genre: movie.genre
+  //     isBad: (movie.review < 5)
+  //   }));
+  //   const likedLen = likedMovies.length;
 
-  res.render("/pages/liked");
+  //   res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
+  // }
+  // catch (err){
+  //   console.log(err);
+  //   res.render("pages/liked", {message: err});
+  // }
+
+  res.render("pages/liked");
 })
 
 // *****************************************************
