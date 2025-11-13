@@ -3,7 +3,7 @@
     <div class="container-fluid">
 
       <!-- Brand -->
-      <a class="navbar-brand" href="/">MySite</a>
+      <a class="navbar-brand" href="/discover">MatchFlix</a>
 
       <!-- Mobile Toggle -->
       <button
@@ -17,31 +17,40 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Navbar Links -->
+      <!-- Navbar Content -->
       <div class="collapse navbar-collapse" id="navbar-collapse">
-        <ul class="navbar-nav me-auto">
+        <!-- Left side links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="/">Home</a> <!-- Profile Page -->
+            <a class="nav-link" href="/discover">Discover</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/about">About</a> <!-- Discovery Page -->
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/services">Services</a> <!-- Swipe Page -->
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/contact">Contact</a> <!-- Search Page -->
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/gallery">Gallery</a> <!-- Liked Movies -->
+            <a class="nav-link" href="/swipe">Swipe</a>
           </li>
         </ul>
 
-        <!-- Optional right-side link -->
-        <div class="nav-item me-1">
-          <a class="nav-link" href="/logout">Logout</a>
-        </div>
+        <!-- Right side profile dropdown -->
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle d-flex align-items-center"
+              href="#"
+              id="profileDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <span class="me-1">👤</span>
+              <span>Profile</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+              <li><a class="dropdown-item" href="/profile">Profile</a></li>
+              <li><a class="dropdown-item" href="/login">Login</a></li>
+              <li><a class="dropdown-item" href="/register">Register</a></li>
+            </ul>
+          </li>
+        </ul>
       </div>
+
     </div>
   </nav>
 </header>
