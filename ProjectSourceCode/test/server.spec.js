@@ -97,7 +97,8 @@ it("Negative : /register - should reject registration with duplicate username", 
 });
 
 // *******************************************************************************
-//EXTRA CREDIT
+//EXTRA CREDIT- 2 more test cases 
+
 //TEST CASE #3- NEGATIVE TEST CASE FOR password length too short
 
 it("Negative : /register - should fail for a short password", (done) => {
@@ -117,6 +118,27 @@ it("Negative : /register - should fail for a short password", (done) => {
       expect(res).to.be.html;
       expect(res.text).to.include("Registration failed");
       expect(res.text).to.include("password");
+      done();
+    });
+});
+
+//TEST CASE #4(EXTRA CREDIT)- POSITIVE TEST CASE FOR USERNAME WITH SPECIAL CHARACTERS
+//verifies that a user can successfully register with special characters in their name
+it("Positive : /register - should allow valid special characters", (done) => {
+  chai
+    .request(server)
+    .post("/register")
+    .send({
+      username: "special" + Date.now(),
+      password: "password123",
+      firstName: "Anne-Marie",
+      lastName: "O'Neil",
+      email: "special" + Date.now() + "@example.com",
+      dateOfBirth: "1995-05-05"
+    })
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      expect(res.text).to.include("User registered successfully!");
       done();
     });
 });
