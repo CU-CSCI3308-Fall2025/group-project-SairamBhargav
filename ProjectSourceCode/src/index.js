@@ -288,6 +288,50 @@ app.get("/profile", async (req, res) => {
   }
 });
 
+// Swipe feature route
+app.get('/swipe', async (req, res) => {
+  try {
+    // Fetch a random movie from TMDB
+    const randomPage = Math.floor(Math.random() * 500) + 1;
+    
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/popular?api_key=98d9665b319075a5eaf64410976293ab&page=${randomPage}`
+    );
+    
+    const data = await response.json();
+    
+    // Pick a random movie from the results
+    const randomIndex = Math.floor(Math.random() * data.results.length);
+    const movieData = data.results[randomIndex];
+    
+    // Format the movie data
+    const movie = {
+      id: movieData.id,
+      title: movieData.title,
+      overview: movieData.overview || 'No overview available.',
+      posterPath: movieData.poster_path 
+        ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` 
+        : null,
+      rating: movieData.vote_average ? movieData.vote_average.toFixed(1) : 'N/A',
+      releaseDate: movieData.release_date || 'Unknown'
+    };
+    
+    // Render the swipe template with the movie data
+    res.render('pages/swipe', {
+      username: req.session.username || req.user?.username,
+      movie: movie
+    });
+    
+  } catch (error) {
+    console.error('Error fetching random movie:', error);
+    res.render('pages/swipe', {
+      username: req.session.username || req.user?.username,
+      error: 'Failed to load movie. Please try again.',
+      movie: null
+    });
+  }
+});
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************

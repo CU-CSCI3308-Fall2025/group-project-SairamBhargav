@@ -11,9 +11,6 @@
     
     
     <div class="container mt-4">
-        <h1>Random Movie</h1>
-        <p>Welcome, {{username}}!</p>
-    
         {{#if error}}
         <div class="alert alert-danger">{{error}}</div>
         {{/if}}
@@ -26,7 +23,7 @@
                     {{else}}
                     <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
                         style="height: 450px;">
-                        <span class="text-white">No Image</span>
+                        <span class="text-white"></span>
                     </div>
                     {{/if}}
                     <div class="card-body">
@@ -36,23 +33,19 @@
                         <p class="text-muted">Release: {{movie.releaseDate}}</p>
                     </div>
                     <div class="card-footer d-flex justify-content-around bg-white border-top">
-                        <form method="POST" action="/movies/like/{{movie.id}}" class="flex-fill me-2">
-                            <button type="submit" class="btn btn-success btn-lg w-100">
-                                Like
-                            </button>
-                        </form>
                         <form method="POST" action="/movies/dislike/{{movie.id}}" class="flex-fill ms-2">
                             <button type="submit" class="btn btn-danger btn-lg w-100">
                                 Dislike
                             </button>
                         </form>
+
+                        <form method="POST" action="/movies/like/{{movie.id}}" class="flex-fill me-2">
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                Like
+                            </button>
+                        </form>
+
                     </div>
-                </div>
-    
-                <div class="text-center mt-4">
-                    <a href="/movies/random" class="btn btn-primary">
-                        Get Another Random Movie
-                    </a>
                 </div>
             </div>
         </div>
