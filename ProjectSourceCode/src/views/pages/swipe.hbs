@@ -93,161 +93,194 @@
 </body>
 </html> --}}
 
+{{> navbar}}
 
-{{> navbar }}
+<div class="container mt-3">
 
-<!DOCTYPE html>
-<html lang="en">
+    <h2 class="text-center">🎥 Swipe for Movies!</h2>
+    <p class="text-center">Welcome, {{username}}!</p>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Swipe</title>
-</head>
+    {{#if error}}
+    <div class="alert alert-danger text-center">
+        {{error}}
+    </div>
+    {{/if}}
+
+    {{#if movie}}
+
+    <div class="row swipe-row mt-3 justify-content-center align-items-center">
+
+        <!-- LEFT DISLIKE BUTTON -->
+        <div class="col-2 text-center">
+            <button id="dislike-btn" class="bigVoteBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b" viewBox="0 0 256 256">
+                    <path
+                        d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- POSTER + HOVER INFO -->
+        <div class="col-8">
+            <div class="swipe-card">
+
+                <div class="poster-wrapper">
+
+                    {{#if movie.posterPath}}
+                    <img src="{{movie.posterPath}}" class="swipe-poster" alt="{{movie.title}}" />
+                    {{else}}
+                    <div class="d-flex align-items-center justify-content-center"
+                        style="height: 400px; background: #222; border-radius: 12px;">
+                        <span class="text-white">No Image</span>
+                    </div>
+                    {{/if}}
+
+                    <!-- Hover overlay -->
+                    <div class="movie-info-overlay">
+                        <div class="overlay-title">{{movie.title}}</div>
+                        <div class="overlay-text">{{movie.overview}}</div>
+                        <div class="overlay-text mt-2">
+                            ⭐ Rating: {{movie.rating}}/10 <br>
+                            📅 Release: {{movie.releaseDate}}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT LIKE BUTTON -->
+        <div class="col-2 text-center">
+            <button id="like-btn" class="bigVoteBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44" viewBox="0 0 256 256">
+                    <path
+                        d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- NEXT MOVIE BUTTON BELOW EVERYTHING -->
+    <div class="text-center mt-4">
+        <a href="/swipe" class="btn btn-dark btn-lg px-4">
+            Next Movie
+        </a>
+    </div>
+
+    {{else}}
+    <p class="text-center mt-5">No movie available.</p>
+    {{/if}}
+
+</div>
 
 <style>
-  .swipe-row {
-    text-align: center;
-  }
+    .swipe-row {
+        text-align: center;
+    }
 
-  /* Poster wrapper */
-  .poster-wrapper {
-    position: relative;
-    overflow: hidden;
-    border-radius: 12px;
-  }
+    /* Poster wrapper */
+    .poster-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+    }
 
-  /* Poster scaled down so page fits */
-  .swipe-poster {
-    width: 100%;
-    height: auto;
-    max-height: 500px;
-    object-fit: contain;
-    border-radius: 12px;
-    background-color: #e8e8e8;
-  }
+    /* Poster scaled down so page fits */
+    .swipe-poster {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        object-fit: contain;
+        border-radius: 12px;
+        background-color: #e8e8e8;
+    }
 
-  .swipe-card {
-    border-radius: 12px;
-    background: #ffffff;
-    padding-bottom: 5px;
-  }
+    .swipe-card {
+        border-radius: 12px;
+        background: #ffffff;
+        padding-bottom: 5px;
+    }
 
-  /* Hover overlay */
-  .movie-info-overlay {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    /* Hover overlay */
+    .movie-info-overlay {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
 
-    background: rgba(0, 0, 0, 0.75);
-    color: #ffffff;
+        background: rgba(0, 0, 0, 0.75);
+        color: #ffffff;
 
-    padding: 10px 12px;
+        padding: 10px 12px;
 
-    opacity: 0;
-    transform: translateY(100%);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+        opacity: 0;
+        transform: translateY(100%);
+        transition: opacity 0.25s ease, transform 0.25s ease;
 
-    max-height: 45%;
-    overflow-y: auto;
-  }
+        max-height: 45%;
+        overflow-y: auto;
+    }
 
-  .poster-wrapper:hover .movie-info-overlay {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    .poster-wrapper:hover .movie-info-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
-  .overlay-title {
-    font-size: 1rem;
-    font-weight: 600;
-  }
+    .overlay-title {
+        font-size: 1rem;
+        font-weight: 600;
+    }
 
-  .overlay-text {
-    font-size: 0.85rem;
-  }
+    .overlay-text {
+        font-size: 0.85rem;
+    }
 
-  /* Large side buttons */
-  .bigVoteBtn {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    border: none;
-    background: #ffffff;
-    font-size: 45px;
-    cursor: pointer;
-    box-shadow: 0 0 12px rgba(0,0,0,0.25);
-    transition: 0.2s;
-  }
+    /* Large side buttons */
+    .bigVoteBtn {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: none;
+        background: #ffffff;
+        font-size: 45px;
+        cursor: pointer;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+        transition: 0.2s;
+    }
 
-  .bigVoteBtn:active {
-    transform: scale(0.93);
-  }
+    .bigVoteBtn:active {
+        transform: scale(0.93);
+    }
 
-  /* Active glow colors */
-  .bigVoteBtn.likeActive {
-    background-color: #d3f9d8;
-    border: 3px solid #2f9e44;
-  }
+    /* Active glow colors */
+    .bigVoteBtn.likeActive {
+        background-color: #d3f9d8;
+        border: 3px solid #2f9e44;
+    }
 
-    .button-container {
-        gap: 40px;
+    .bigVoteBtn.dislikeActive {
+        background-color: #ffa8a8;
+        border: 3px solid #e00b0b;
     }
 </style>
 
-<body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const likeBtn = document.getElementById("like-btn");
+        const dislikeBtn = document.getElementById("dislike-btn");
 
+        likeBtn.addEventListener("click", () => {
+            likeBtn.classList.add("likeActive");
+            dislikeBtn.classList.remove("dislikeActive");
+        });
 
-    <div class="container mt-4">
-        {{#if error}}
-        <div class="alert alert-danger">{{error}}</div>
-        {{/if}}
-
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    {{#if movie.posterPath}}
-                    <img src="{{movie.posterPath}}" class="card-img-top" alt="{{movie.title}}" />
-                    {{else}}
-                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
-                        style="height: 450px;">
-                        <span class="text-white"></span>
-                    </div>
-                    {{/if}}
-                    <div class="card-body">
-                        <h5 class="card-title">{{movie.title}}</h5>
-                        <p class="card-text">{{movie.overview}}</p>
-                        <p class="text-muted">Rating: {{movie.rating}}/10</p>
-                        <p class="text-muted">Release: {{movie.releaseDate}}</p>
-                    </div>
-                    <div class="card-footer d-flex justify-content-center bg-white border-top button-container">
-                        <form method="POST" action="/movies/dislike/{{movie.id}}">
-                            <button type="submit" class="dislikedBTN">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b"
-                                    viewBox="0 0 256 256">
-                                    <path
-                                        d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                                    </path>
-                                </svg>
-                            </button>
-                        </form>
-
-                        <form method="POST" action="/movies/like/{{movie.id}}">
-                            <button type="submit" class="likedBTN">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44"
-                                    viewBox="0 0 256 256">
-                                    <path
-                                        d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
-                                    </path>
-                                </svg>
-                            </button>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-
-</html>
+        dislikeBtn.addEventListener("click", () => {
+            dislikeBtn.classList.add("dislikeActive");
+            likeBtn.classList.remove("likeActive");
+        });
+    });
+</script>
