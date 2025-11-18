@@ -198,8 +198,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.use(auth);
-
 // Discover page - shows movies from TMDB
 app.get("/discover", auth, async (req, res) => {
   try {
@@ -326,17 +324,39 @@ app.get('/liked', async (req,res) => {
 
     const likedMoviesDB = await db.any(query, [username]);
 
-    const likedMovies = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
-      name: movie.name,
-      poster_url: movie.poster_url,
-      review: movie.review,
-      year_of_release: movie.year_of_release,
-      genre: movie.genre,
-      isBad: (movie.review < 5)
+    const likedMoviesID = likedMoviesDB.slice(0, likedMoviesDB.length).map(movie => ({
+      movie_id: movie.movie_id
     }));
-    const likedLen = likedMovies.length;
+  
+    const likedLen = likedMoviesID.length;
 
-    res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
+    // Fetch movies using the IDs we got from the db
+    const url2 = 'https://api.themoviedb.org/3/find/tt0050083?external_source=imdb_id&language=en-US';
+
+    const response = await axios.get(
+      url2,
+      {
+        params: {
+          api_key: process.env.TMDB_API_KEY,
+        },
+      }
+    );
+
+    console.log("Liked movie: " + response.data.movie_results[0].title);
+
+    // const movies = response.data.results.map((movie) => ({
+    //   id: movie.id,
+    //   title: movie.title,
+    //   overview: movie.overview,
+    //   posterPath: movie.poster_path
+    //     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    //     : null,
+    //   releaseDate: movie.release_date,
+    //   rating: movie.vote_average,
+    // }));
+
+
+    // res.render('pages/liked', { likedMovies: likedMovies, numOfLiked: likedLen});
   }
   catch (err){
     console.log(err);
