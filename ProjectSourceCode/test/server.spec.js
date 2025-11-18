@@ -10,8 +10,6 @@ chai.should();
 chai.use(chaiHttp);
 const { assert, expect } = chai;
 
-
-
 // ********************** DEFAULT WELCOME TESTCASE ****************************
 
 describe("Server!", () => {

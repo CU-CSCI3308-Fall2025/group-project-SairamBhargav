@@ -1,8 +1,12 @@
 <div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f8f9fa;">
   <div class="card shadow-lg p-4" style="width: 400px; border-radius: 16px;">
     <div class="text-center mb-4">
-      <h3 class="fw-bold">🎬 MatchFlix</h3>
-      <p class="text-muted mb-0">Create an account to discover movies you love</p>
+      <h3 class="fw-bold">
+        🎬 MatchFlix
+      </h3>
+      <p class="text-muted mb-0">
+        Create an account to discover movies you love
+      </p>
     </div>
 
     {{#if message}}
@@ -12,33 +16,29 @@
     {{/if}}
 
     <form action="/register" method="POST">
+           <div class="mb-3">
+      <label for="firstName" class="form-label">First Name</label>
+      <input type="text" class="form-control" name="firstName" required>
+    </div>
 
-      <div class="mb-3">
-        <label for="firstName" class="form-label">First Name</label>
-        <input type="text" id="firstName" class="form-control" name="firstName" oninput="fetchSuggestions()" required>
-      </div>
+    <div class="mb-3">
+      <label for="lastName" class="form-label">Last Name</label>
+      <input type="text" class="form-control" name="lastName" required>
+    </div>
 
-      <div class="mb-3">
-        <label for="lastName" class="form-label">Last Name</label>
-        <input type="text" id="lastName" class="form-control" name="lastName" oninput="fetchSuggestions()" required>
-      </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" class="form-control" name="email" required>
+    </div>
 
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" name="email" required>
-      </div>
+    <div class="mb-3">
+      <label for="dateOfBirth" class="form-label">Date of Birth</label>
+      <input type="date" class="form-control" name="dateOfBirth" required>
+    </div>
 
-      <div class="mb-3">
-        <label for="dateOfBirth" class="form-label">Date of Birth</label>
-        <input type="date" id="dateOfBirth" class="form-control" name="dateOfBirth" oninput="fetchSuggestions()" required>
-      </div>
-
-      <div class="mb-3 position-relative">
+    <div class="mb-3">
         <label for="username" class="form-label fw-semibold">Username</label>
         <input type="text" class="form-control" id="username" name="username" required>
-
-        <!-- AI Suggestions -->
-        <div id="username-suggestions" class="suggestion-box"></div>
       </div>
 
       <div class="mb-3">
@@ -46,9 +46,7 @@
         <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
       </div>
 
-      <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #000022;">
-        Create Account
-      </button>
+      <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #000022;">Create Account</button>
     </form>
 
     <div class="text-center mt-3">
@@ -58,69 +56,3 @@
     </div>
   </div>
 </div>
-
-<!-- ===================== -->
-<!-- Username Suggestion JS -->
-<!-- ===================== -->
-<script>
-async function fetchSuggestions() {
-  const firstName = document.getElementById("firstName").value;
-  const lastName  = document.getElementById("lastName").value;
-  const dob       = document.getElementById("dateOfBirth").value;
-
-  if (!firstName || !lastName || !dob) return;
-
-  const birthYear = dob.split("-")[0];
-
-  const res = await fetch("/suggest-username", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ firstName, lastName, birthYear })
-  });
-
-  const data = await res.json();
-  const box = document.getElementById("username-suggestions");
-  box.innerHTML = "";
-
-  data.suggestions.forEach(name => {
-    const div = document.createElement("div");
-    div.innerText = name;
-    div.classList.add("suggestion-item");
-
-    div.onclick = () => {
-      document.getElementById("username").value = name;
-      box.innerHTML = "";
-    };
-
-    box.appendChild(div);
-  });
-}
-</script>
-
-<!-- ===================== -->
-<!-- Styles -->
-<!-- ===================== -->
-<style>
-.suggestion-box {
-  border: 1px solid #ccc;
-  background: white;
-  width: 100%;
-  max-height: 160px;
-  overflow-y: auto;
-  position: absolute;
-  z-index: 1000;
-  top: 45px;
-  left: 0;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-.suggestion-item {
-  padding: 8px 10px;
-  cursor: pointer;
-}
-
-.suggestion-item:hover {
-  background-color: #f0f0f0;
-}
-</style>
