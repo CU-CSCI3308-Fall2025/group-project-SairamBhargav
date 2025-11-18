@@ -1,8 +1,8 @@
-{{> navbar }}
+{{> navbar}}
 
-<div class="container mt-4">
+<div class="container mt-3">
 
-  <h1 class="text-center">Swipe Movie</h1>
+  <h2 class="text-center">🎥 Swipe for Movies!</h2>
   <p class="text-center">Welcome, {{username}}!</p>
 
   {{#if error}}
@@ -12,49 +12,66 @@
   {{/if}}
 
   {{#if movie}}
-    <div class="row justify-content-center mt-4">
-      <div class="col-md-6">
 
-        <div class="card h-100 position-relative">
+    <div class="row swipe-row mt-3 justify-content-center align-items-center">
 
-          <!-- LEFT BUTTON (dislike) -->
-          <button id="dislike-btn" class="sideButton dislikeSide">
-            👎
-          </button>
+      <!-- LEFT DISLIKE BUTTON -->
+      <div class="col-2 text-center">
+        <button id="dislike-btn" class="bigVoteBtn">
+          👎
+        </button>
+      </div>
 
-          <!-- RIGHT BUTTON (like) -->
-          <button id="like-btn" class="sideButton likeSide">
-            👍
-          </button>
+      <!-- POSTER + HOVER INFO -->
+      <div class="col-8">
+        <div class="swipe-card">
 
-          {{#if movie.posterPath}}
-            <img 
-              src="{{movie.posterPath}}" 
-              class="card-img-top swipe-poster"
-              alt="{{movie.title}}" 
-            />
-          {{else}}
-            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
-                 style="height: 300px;">
-              <span class="text-white">No Image</span>
+          <div class="poster-wrapper">
+
+            {{#if movie.posterPath}}
+              <img 
+                src="{{movie.posterPath}}" 
+                class="swipe-poster"
+                alt="{{movie.title}}"
+              />
+            {{else}}
+              <div class="d-flex align-items-center justify-content-center"
+                   style="height: 400px; background: #222; border-radius: 12px;">
+                <span class="text-white">No Image</span>
+              </div>
+            {{/if}}
+
+            <!-- Hover overlay -->
+            <div class="movie-info-overlay">
+              <div class="overlay-title">{{movie.title}}</div>
+              <div class="overlay-text">{{movie.overview}}</div>
+              <div class="overlay-text mt-2">
+                ⭐ Rating: {{movie.rating}}/10 <br>
+                📅 Release: {{movie.releaseDate}}
+              </div>
             </div>
-          {{/if}}
 
-          <div class="card-body text-center">
-            <h5 class="card-title">{{movie.title}}</h5>
-            <p class="card-text">{{movie.overview}}</p>
-            <p class="text-muted">Rating: {{movie.rating}}/10</p>
-            <p class="text-muted">Release: {{movie.releaseDate}}</p>
-
-            <a href="/swipe" class="btn btn-outline-dark mt-3">
-              Next Movie
-            </a>
           </div>
 
         </div>
-
       </div>
+
+      <!-- RIGHT LIKE BUTTON -->
+      <div class="col-2 text-center">
+        <button id="like-btn" class="bigVoteBtn">
+          👍
+        </button>
+      </div>
+
     </div>
+
+    <!-- NEXT MOVIE BUTTON BELOW EVERYTHING -->
+    <div class="text-center mt-4">
+      <a href="/swipe" class="btn btn-dark btn-lg px-4">
+        Next Movie
+      </a>
+    </div>
+
   {{else}}
     <p class="text-center mt-5">No movie available.</p>
   {{/if}}
@@ -62,45 +79,93 @@
 </div>
 
 <style>
-  /* Poster size */
-  .swipe-poster {
-    max-height: 300px;
-    object-fit: cover;
+  .swipe-row {
+    text-align: center;
   }
 
-  /* LEFT & RIGHT BUTTONS */
-  .sideButton {
+  /* Poster wrapper */
+  .poster-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  /* Poster scaled down so page fits */
+  .swipe-poster {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 12px;
+    background-color: #e8e8e8;
+  }
+
+  .swipe-card {
+    border-radius: 12px;
+    background: #ffffff;
+    padding-bottom: 5px;
+  }
+
+  /* Hover overlay */
+  .movie-info-overlay {
     position: absolute;
-    top: 40%;
-    transform: translateY(-50%);
-    width: 70px;
-    height: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+
+    padding: 10px 12px;
+
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+
+    max-height: 45%;
+    overflow-y: auto;
+  }
+
+  .poster-wrapper:hover .movie-info-overlay {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .overlay-title {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .overlay-text {
+    font-size: 0.85rem;
+  }
+
+  /* Large side buttons */
+  .bigVoteBtn {
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     border: none;
     background: #ffffff;
-    font-size: 28px;
+    font-size: 45px;
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    box-shadow: 0 0 12px rgba(0,0,0,0.25);
+    transition: 0.2s;
   }
 
-  .dislikeSide {
-    left: -35px;
+  .bigVoteBtn:active {
+    transform: scale(0.93);
   }
 
-  .likeSide {
-    right: -35px;
-  }
-
-  /* Active colors */
-  .sideButton.likeActive {
+  /* Active glow colors */
+  .bigVoteBtn.likeActive {
     background-color: #d3f9d8;
-    border: 2px solid #2f9e44;
+    border: 3px solid #2f9e44;
   }
 
-  .sideButton.dislikeActive {
+  .bigVoteBtn.dislikeActive {
     background-color: #ffa8a8;
-    border: 2px solid #e00b0b;
+    border: 3px solid #e00b0b;
   }
 </style>
 
