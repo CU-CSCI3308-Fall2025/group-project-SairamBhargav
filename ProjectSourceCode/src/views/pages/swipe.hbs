@@ -1,11 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+<div class="container mt-4">
+
+  <h1 class="text-center">Swipe Movie</h1>
+  <p class="text-center">Welcome, {{username}}!</p>
+
+  {{#if error}}
+    <div class="alert alert-danger text-center">
+      {{error}}
+    </div>
+  {{/if}}
+
+  {{#if movie}}
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-6">
+
+        <div class="card">
+
+          {{#if movie.posterPath}}
+            <img 
+              src="{{movie.posterPath}}" 
+              class="card-img-top"
+              alt="{{movie.title}}" 
+            />
+          {{/if}}
+
+          <div class="card-body text-center">
+            <h3 class="card-title">{{movie.title}}</h3>
+            <p class="card-text">{{movie.overview}}</p>
+
+            <p class="text-muted">
+              Rating: {{movie.rating}}/10<br/>
+              Release: {{movie.releaseDate}}
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  {{else}}
+    <p class="text-center mt-5">No movie available.</p>
+  {{/if}}
+
+</div>

@@ -90,16 +90,19 @@ app.get("/welcome", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  if (req.session.user) {
+  // use username since that's what we store in session
+  if (req.session.username) {
     res.redirect("/discover");
   } else {
     res.redirect("/login");
   }
 });
+
 //register page
 app.get("/register", (req, res) => {
   res.render("pages/register", { title: "Register" });
 });
+
 app.post("/register", async (req, res) => {
   const { username, password, firstName, lastName, email, dateOfBirth } =
     req.body;
@@ -109,19 +112,18 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Minimum password length, must be 8 characters mimimum
-  if (password.length < 8) {
-    return res.render("pages/register", {
-      message: "Registration failed. Password must be at least 8 characters.",
-      error: true,
-    });
-  }
+    if (password.length < 8) {
+      return res.render("pages/register", {
+        message: "Registration failed. Password must be at least 8 characters.",
+        error: true,
+      });
+    }
 
     // insert user into database
     await db.none(
       `INSERT INTO users (username, password, firstName, lastName, email, dateOfBirth)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [username, hashedPassword, firstName, lastName, email, dateOfBirth]
-
     );
 
     res.render("pages/register", {
@@ -212,14 +214,66 @@ app.get("/discover", auth, async (req, res) => {
     res.render("pages/discover", {
       movies: [],
       error: "Failed to load movies",
-      });
+    });
   }
 });
-  // Authentication Required
-  app.use(auth);
 
+// Swipe page - show one random movie from TMDB
+app.get("/swipe", auth, async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/discover/movie`,
+      {
+        params: {
+          api_key: process.env.TMDB_API_KEY,
+          sort_by: "popularity.desc",
+          language: "en-US",
+          page: 1,
+          include_adult: false,
+        },
+      }
+    );
 
-  // --- PROFILE ROUTE ---
+    const movies = response.data.results.map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+      overview: movie.overview,
+      posterPath: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null,
+      releaseDate: movie.release_date,
+      rating: movie.vote_average,
+    }));
+
+    if (!movies || movies.length === 0) {
+      return res.render("pages/swipe", {
+        movie: null,
+        error: "No movies found from API.",
+        username: req.session.username,
+      });
+    }
+
+    const randomIndex = Math.floor(Math.random() * movies.length);
+    const randomMovie = movies[randomIndex];
+
+    res.render("pages/swipe", {
+      movie: randomMovie,
+      username: req.session.username,
+    });
+  } catch (err) {
+    console.error("Error fetching movie for swipe:", err.message);
+    res.render("pages/swipe", {
+      movie: null,
+      error: "Failed to load movie.",
+      username: req.session.username,
+    });
+  }
+});
+
+// Authentication Required
+app.use(auth);
+
+// --- PROFILE ROUTE ---
 app.get("/profile", async (req, res) => {
   const username = req.session.username; // or however you store the logged-in user
 
@@ -236,31 +290,40 @@ app.get("/profile", async (req, res) => {
     );
 
     // --- Get most liked genre ---
-    const topGenre = await db.query(`
+    const topGenre = await db.query(
+      `
       SELECT genre FROM liked_movies
       WHERE username = $1
       GROUP BY genre
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Get most liked actor ---
-    const topActor = await db.query(`
+    const topActor = await db.query(
+      `
       SELECT actor FROM liked_movies
       WHERE username = $1
       GROUP BY actor
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Get most liked actress ---
-    const topActress = await db.query(`
+    const topActress = await db.query(
+      `
       SELECT actress FROM liked_movies
       WHERE username = $1
       GROUP BY actress
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Render the profile page ---
     res.render("pages/profile", {
