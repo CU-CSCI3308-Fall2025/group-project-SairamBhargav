@@ -372,6 +372,14 @@ app.post("/api/recommendations/generate", auth, async (req, res) => {
   }
 });
 
+// help function potentially??
+function showLoadingOverlay() {
+  const overlay = document.getElementById("loading-overlay");
+  if (overlay) {
+    overlay.classList.remove("hidden");
+  }
+}
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
