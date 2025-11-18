@@ -1,3 +1,5 @@
+{{> navbar }}
+
 <div class="container mt-4">
 
   <h1 class="text-center">Swipe Movie</h1>
@@ -12,54 +14,45 @@
   {{#if movie}}
     <div class="row justify-content-center mt-4">
       <div class="col-md-6">
-        <div class="card h-100">
+
+        <div class="card h-100 position-relative">
+
+          <!-- LEFT BUTTON (dislike) -->
+          <button id="dislike-btn" class="sideButton dislikeSide">
+            👎
+          </button>
+
+          <!-- RIGHT BUTTON (like) -->
+          <button id="like-btn" class="sideButton likeSide">
+            👍
+          </button>
 
           {{#if movie.posterPath}}
             <img 
               src="{{movie.posterPath}}" 
-              class="card-img-top"
+              class="card-img-top swipe-poster"
               alt="{{movie.title}}" 
             />
           {{else}}
             <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
-                 style="height: 450px;">
+                 style="height: 300px;">
               <span class="text-white">No Image</span>
             </div>
           {{/if}}
 
-          <div class="card-body">
+          <div class="card-body text-center">
             <h5 class="card-title">{{movie.title}}</h5>
             <p class="card-text">{{movie.overview}}</p>
             <p class="text-muted">Rating: {{movie.rating}}/10</p>
             <p class="text-muted">Release: {{movie.releaseDate}}</p>
-          </div>
 
-          <!-- LIKE / DISLIKE BUTTONS (original behavior kept) -->
-          <div class="card-footer d-flex justify-content-center bg-white border-top button-container">
-            <form method="POST" action="/movies/dislike/{{movie.id}}">
-              <button type="submit" class="dislikedBTN">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b"
-                     viewBox="0 0 256 256">
-                  <path
-                    d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                  </path>
-                </svg>
-              </button>
-            </form>
-
-            <form method="POST" action="/movies/like/{{movie.id}}">
-              <button type="submit" class="likedBTN">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44"
-                     viewBox="0 0 256 256">
-                  <path
-                    d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
-                  </path>
-                </svg>
-              </button>
-            </form>
+            <a href="/swipe" class="btn btn-outline-dark mt-3">
+              Next Movie
+            </a>
           </div>
 
         </div>
+
       </div>
     </div>
   {{else}}
@@ -69,33 +62,61 @@
 </div>
 
 <style>
-  .likedBTN {
-    width: 60px;
-    height: 60px;
+  /* Poster size */
+  .swipe-poster {
+    max-height: 300px;
+    object-fit: cover;
+  }
+
+  /* LEFT & RIGHT BUTTONS */
+  .sideButton {
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    background: #ffffff;
+    font-size: 28px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  }
+
+  .dislikeSide {
+    left: -35px;
+  }
+
+  .likeSide {
+    right: -35px;
+  }
+
+  /* Active colors */
+  .sideButton.likeActive {
     background-color: #d3f9d8;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border-radius: 50%;
-    text-decoration: none;
-    border: none;
+    border: 2px solid #2f9e44;
   }
 
-  .dislikedBTN {
-    width: 60px;
-    height: 60px;
+  .sideButton.dislikeActive {
     background-color: #ffa8a8;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border-radius: 50%;
-    text-decoration: none;
-    border: none;
-  }
-
-  .button-container {
-    gap: 40px;
+    border: 2px solid #e00b0b;
   }
 </style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const likeBtn = document.getElementById("like-btn");
+    const dislikeBtn = document.getElementById("dislike-btn");
+
+    likeBtn.addEventListener("click", () => {
+      likeBtn.classList.add("likeActive");
+      dislikeBtn.classList.remove("dislikeActive");
+    });
+
+    dislikeBtn.addEventListener("click", () => {
+      dislikeBtn.classList.add("dislikeActive");
+      likeBtn.classList.remove("likeActive");
+    });
+  });
+</script>
