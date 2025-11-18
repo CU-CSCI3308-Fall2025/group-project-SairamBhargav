@@ -221,6 +221,17 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Logout route
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.redirect("/discover");
+    }
+    res.render("pages/logout");
+  });
+});
+
 // Discover page - shows movies from TMDB
 app.get("/discover", auth, async (req, res) => {
   try {
