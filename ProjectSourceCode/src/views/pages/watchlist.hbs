@@ -1,0 +1,61 @@
+{{> navbar }}
+
+<div class="container mt-4">
+  <h1>My Watchlist</h1>
+  <p>Welcome, {{username}}!</p>
+
+  {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
+  {{#if message}}
+    <div class="alert alert-success">{{message}}</div>
+  {{/if}}
+
+  {{#if movies.length}}
+    <div class="row">
+      {{#each movies}}
+        <div class="col-md-3 mb-4">
+          <div class="card h-100">
+            {{#if posterPath}}
+              <img src="{{posterPath}}" class="card-img-top" alt="{{title}}" />
+            {{else}}
+              <div
+                class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
+                style="height: 450px;"
+              >
+                <span class="text-white">No Image</span>
+              </div>
+            {{/if}}
+            <div class="card-body">
+              <h5 class="card-title">{{title}}</h5>
+              <p class="card-text">{{overview}}</p>
+              <p class="text-muted">Rating: {{rating}}/10</p>
+              <p class="text-muted">Release: {{releaseDate}}</p>
+              <p class="text-muted"><small>Added: {{addedAt}}</small></p>
+              
+              {{#if notes}}
+                <div class="mt-2">
+                  <strong>Notes:</strong>
+                  <p class="text-muted">{{notes}}</p>
+                </div>
+              {{/if}}
+              
+              <form action="/watchlist/remove" method="POST" class="mt-3">
+                <input type="hidden" name="movie_id" value="{{movie_id}}">
+                <button type="submit" class="btn btn-danger w-100">
+                  Remove from Watchlist
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="alert alert-info text-center">
+      <h4>Your watchlist is empty!</h4>
+      <p>Start adding movies from the <a href="/discover" class="alert-link">Discover</a> page.</p>
+    </div>
+  {{/if}}
+</div>

@@ -8,6 +8,10 @@
     <div class="alert alert-danger">{{error}}</div>
   {{/if}}
 
+  {{#if message}}
+    <div class="alert alert-success">{{message}}</div>
+  {{/if}}
+
   <div class="row">
     {{#each movies}}
       <div class="col-md-3 mb-4">
@@ -27,6 +31,25 @@
             <p class="card-text">{{overview}}</p>
             <p class="text-muted">Rating: {{rating}}/10</p>
             <p class="text-muted">Release: {{releaseDate}}</p>
+            
+            <form action="/watchlist/add" method="POST" class="mt-3">
+              <input type="hidden" name="movie_id" value="{{id}}">
+              <input type="hidden" name="title" value="{{title}}">
+              <input type="hidden" name="posterPath" value="{{posterPath}}">
+              <input type="hidden" name="overview" value="{{overview}}">
+              <input type="hidden" name="rating" value="{{rating}}">
+              <input type="hidden" name="releaseDate" value="{{releaseDate}}">
+              
+              {{#if inWatchlist}}
+                <button type="submit" formaction="/watchlist/remove" class="btn btn-danger w-100">
+                  Remove from Watchlist
+                </button>
+              {{else}}
+                <button type="submit" class="btn btn-primary w-100">
+                  Add to Watchlist
+                </button>
+              {{/if}}
+            </form>
           </div>
         </div>
       </div>
