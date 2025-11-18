@@ -176,8 +176,11 @@ app.post("/login", async (req, res) => {
 });
 
 // Discover page - shows movies from TMDB
+// Discover page - shows movies from TMDB
 app.get("/discover", auth, async (req, res) => {
   try {
+    const username = req.session.username;
+    
     // Fetch popular movies from TMDB
     const response = await axios.get(
       `https://api.themoviedb.org/3/discover/movie`,
@@ -192,6 +195,13 @@ app.get("/discover", auth, async (req, res) => {
       }
     );
 
+    // Get user's watchlist movie IDs
+    const watchlistIds = await db.any(
+      `SELECT movie_id FROM watchlist WHERE username = $1`,
+      [username]
+    );
+    const watchlistMovieIds = new Set(watchlistIds.map(item => item.movie_id));
+
     const movies = response.data.results.map((movie) => ({
       id: movie.id,
       title: movie.title,
@@ -201,20 +211,130 @@ app.get("/discover", auth, async (req, res) => {
         : null,
       releaseDate: movie.release_date,
       rating: movie.vote_average,
+      inWatchlist: watchlistMovieIds.has(movie.id),
     }));
 
     res.render("pages/discover", {
       movies: movies,
-      username: req.session.username,
+      username: username,
     });
   } catch (err) {
     console.error("Error fetching movies:", err.message);
     res.render("pages/discover", {
       movies: [],
       error: "Failed to load movies",
-      });
+    });
   }
 });
+
+// Watchlist page - shows user's saved movies
+app.get("/watchlist", auth, async (req, res) => {
+  try {
+    const username = req.session.username;
+    
+    // Fetch user's watchlist from database
+    const watchlistItems = await db.any(
+      `SELECT w.*, w.movie_id, w.added_at, w.notes
+       FROM watchlist w
+       WHERE w.username = $1
+       ORDER BY w.added_at DESC`,
+      [username]
+    );
+
+    // For each watchlist item, fetch movie details from TMDB
+    const moviesPromises = watchlistItems.map(async (item) => {
+      try {
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/movie/${item.movie_id}`,
+          {
+            params: {
+              api_key: process.env.TMDB_API_KEY,
+            },
+          }
+        );
+
+        const movie = response.data;
+        return {
+          movie_id: item.movie_id,
+          title: movie.title,
+          overview: movie.overview,
+          posterPath: movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : null,
+          releaseDate: movie.release_date,
+          rating: movie.vote_average,
+          addedAt: new Date(item.added_at).toLocaleDateString(),
+          notes: item.notes,
+        };
+      } catch (err) {
+        console.error(`Error fetching movie ${item.movie_id}:`, err.message);
+        return null;
+      }
+    });
+
+    const movies = (await Promise.all(moviesPromises)).filter(
+      (movie) => movie !== null
+    );
+
+    res.render("pages/watchlist", {
+      movies: movies,
+      username: username,
+    });
+  } catch (err) {
+    console.error("Error fetching watchlist:", err.message);
+    res.render("pages/watchlist", {
+      movies: [],
+      error: "Failed to load watchlist",
+      username: req.session.username,
+    });
+  }
+});
+
+// Add movie to watchlist
+app.post("/watchlist/add", auth, async (req, res) => {
+  try {
+    const username = req.session.username;
+    const { movie_id } = req.body;
+
+    await db.none(
+      `INSERT INTO watchlist (username, movie_id)
+       VALUES ($1, $2)
+       ON CONFLICT (username, movie_id) DO NOTHING`,
+      [username, movie_id]
+    );
+
+    res.redirect("/discover");
+  } catch (err) {
+    console.error("Error adding to watchlist:", err.message);
+    res.redirect("/discover");
+  }
+});
+
+// Remove movie from watchlist
+app.post("/watchlist/remove", auth, async (req, res) => {
+  try {
+    const username = req.session.username;
+    const { movie_id } = req.body;
+
+    await db.none(
+      `DELETE FROM watchlist 
+       WHERE username = $1 AND movie_id = $2`,
+      [username, movie_id]
+    );
+
+    // Check if the request came from the watchlist page or discover page
+    const referer = req.get("Referer");
+    if (referer && referer.includes("/watchlist")) {
+      res.redirect("/watchlist");
+    } else {
+      res.redirect("/discover");
+    }
+  } catch (err) {
+    console.error("Error removing from watchlist:", err.message);
+    res.redirect("/discover");
+  }
+});
+
   // Authentication Required
   app.use(auth);
 
