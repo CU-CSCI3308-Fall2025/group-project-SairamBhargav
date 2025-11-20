@@ -288,31 +288,6 @@ app.get("/profile", async (req, res) => {
   }
 });
 
-app.get('/liked', async (req,res) => {
-
-  const username = session.username;
-  const query = `
-    SELECT movie_id
-    FROM liked_movies
-    WHERE username = $1
-  `
-  try{
-    console.log("Querying");
-    const likedMoviesIDs = await db.any(query, [username]);
-
-    console.log("API-ing");
-    const likedMovies = await axios.get(
-      `https://api.themoviedb.org/3/find/tt0050083?external_source=imdb_id&language=en-US`
-    );
-
-    console.log(likedMovies);
-    res.render("pages/liked");
-  }
-  catch{
-
-  }
-});
-
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
