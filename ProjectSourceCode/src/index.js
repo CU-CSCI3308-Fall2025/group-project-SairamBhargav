@@ -332,6 +332,51 @@ app.get('/swipe', async (req, res) => {
   }
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const like = document.getElementById('like-btn');
+    const dislike = document.getElementById('dislike-btn');
+    
+    const movieId = document.getElementById('movie-id')?.value;
+    const username = document.getElementById('username')?.textContent;
+    
+    if (like) {
+        like.addEventListener('click', function() {
+            recordSwipe('like', movieId, username);
+        });
+    }
+    
+    if (dislike) {
+        dislike.addEventListener('click', function() {
+            recordSwipe('dislike', movieId, username);
+        });
+    }
+});
+
+async function recordSwipe(action, movieId, username) 
+{
+    try 
+    {
+        const response = await fetch('/api/swipe', 
+          {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                movie_id: movieId,
+                action: action
+            })
+        });  
+    } 
+
+    catch (error) 
+    {
+        console.error('Error:', error);
+        alert('Error');
+    }
+}
+
 
 
 // *****************************************************
