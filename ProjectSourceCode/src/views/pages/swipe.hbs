@@ -182,6 +182,37 @@
         background-color: #ffa8a8;
         border: 3px solid #e00b0b;
     }
+    
+    #like-btn {
+        background: linear-gradient(to right, #d3f9d8 50%, #ffffff 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        transition: all 0.9s ease;
+    }
+
+    #like-btn:hover {
+        background-position: left bottom;
+        transition: all .5s;
+        transform: scale(1.1);
+    }
+
+    #dislike-btn {
+        background: linear-gradient(to right, #ffa8a8 50%, #ffffff 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        transition: all 0.9s ease;
+    }
+
+    #dislike-btn:hover {
+        background-position: left bottom;
+        transition: all .5s;
+        transform: scale(1.1);
+    }
+
+    #skip-btn:hover{
+        transition: all .5s;
+        transform: scale(1.2);
+    }
 </style>
 
 {{> navbar}}
@@ -271,9 +302,9 @@
 
     <!-- NEXT MOVIE BUTTON BELOW EVERYTHING -->
     <div class="text-center mt-4">
-        <a href="/swipe" class="btn btn-dark btn-lg px-4">
-            Skip
-        </a>
+            <a href="/swipe" id = "skip-btn" class="btn btn-dark btn-lg px-4">
+                Skip
+            </a>
     </div>
 
     {{else}}
