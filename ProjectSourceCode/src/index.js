@@ -332,6 +332,49 @@ app.get('/swipe', async (req, res) => {
   }
 });
 
+app.post("/movies/like/:id", auth, async (req, res) => {
+    const username = req.session.username;
+    const movieId = req.params.id;
+
+    try {
+        await db.none(
+            `INSERT INTO swipes(username, movie_id, action)
+            VALUES($1, $2, 'like')
+            ON CONFLICT(username, movie_id)
+            DO UPDATE SET action = 'like'`,
+            [username, movieId]
+        );
+
+        res.redirect("/swipe");
+    } 
+    catch (err) {
+        console.error("Error saving like swipe:", err);
+        res.status(500).send("Failed to save swipe");
+    }
+});
+
+app.post("/movies/dislike/:id", auth, async (req, res) => {
+    const username = req.session.username;
+    const movieId = req.params.id;
+
+    try {
+        await db.none(
+            `INSERT INTO swipes(username, movie_id, action)
+            VALUES($1, $2, 'dislike')
+            ON CONFLICT(username, movie_id)
+            DO UPDATE SET action = 'dislike'`,
+            [username, movieId]
+        );
+
+        res.redirect("/swipe");
+    } 
+    catch (err) {
+        console.error("Error saving dislike swipe:", err);
+        res.status(500).send("Failed to save swipe");
+    }
+});
+
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
