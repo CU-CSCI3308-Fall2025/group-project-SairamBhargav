@@ -1,5 +1,3 @@
-{{!-- views/pages/swipe.hbs --}}
-
 <style>
     .swipe-row {
         text-align: center;
@@ -89,6 +87,86 @@
         background-color: #ffa8a8;
         border: 3px solid #e00b0b;
     }
+
+    /* Recommendation modal */
+    .reco-modal {
+        position: fixed;
+        inset: 0;
+        display: none; /* hidden by default */
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+    }
+
+    .reco-modal.show {
+        display: flex;
+    }
+
+    .reco-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .reco-content {
+        position: relative;
+        background: #ffffff;
+        border-radius: 16px;
+        max-width: 900px;
+        width: 90%;
+        max-height: 80vh;
+        padding: 20px;
+        overflow-y: auto;
+        box-shadow: 0 0 30px rgba(0,0,0,0.35);
+    }
+
+    .reco-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 12px;
+    }
+
+    .reco-card {
+        flex: 1 1 200px;
+        max-width: 220px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        background: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .reco-card img {
+        width: 100%;
+        height: 260px;
+        object-fit: cover;
+    }
+
+    .reco-card-body {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .reco-card-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 0.95rem;
+    }
+
+    .reco-card-text {
+        font-size: 0.8rem;
+        max-height: 80px;
+        overflow: hidden;
+    }
+
+    .reco-meta {
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 4px;
+    }
 </style>
 
 {{> navbar}}
@@ -108,6 +186,11 @@
 
     <div class="row swipe-row mt-3 justify-content-center align-items-center">
 
+        <!-- Hidden username for JS -->
+        <input type="hidden" id="username-hidden" value="{{username}}">
+        <!-- Hidden movie id if you ever need it in JS -->
+        <input type="hidden" id="movie-id" value="{{movie.id}}">
+
         <!-- LEFT DISLIKE BUTTON -->
         <div class="col-2 text-center">
             <form method="POST" action="/movies/dislike/{{movie.id}}">
@@ -124,7 +207,6 @@
         <!-- POSTER + HOVER INFO -->
         <div class="col-8">
             <div class="swipe-card">
-
                 <div class="poster-wrapper">
 
                     {{#if movie.posterPath}}
@@ -141,18 +223,8 @@
                         <div class="overlay-title">{{movie.title}}</div>
                         <div class="overlay-text">{{movie.overview}}</div>
                         <div class="overlay-text mt-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#b5b512" viewBox="0 0 256 256">
-                                <path
-                                    d="M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z">
-                                </path>
-                            </svg>
-                            Rating: {{movie.rating}}/10 <br>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#b5b512" viewBox="0 0 256 256">
-                                <path
-                                    d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-96-88v64a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm59.16,30.45L152,176h16a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136,23.76,23.76,0,0,1,171.16,150.45Z">
-                                </path>
-                            </svg>
-                            Release: {{movie.releaseDate}}
+                            ⭐ Rating: {{movie.rating}}/10 <br>
+                            📅 Release: {{movie.releaseDate}}
                         </div>
                     </div>
 
@@ -189,7 +261,23 @@
 
 </div>
 
+<!-- Recommendation popup modal -->
+<div id="reco-modal" class="reco-modal">
+    <div class="reco-backdrop"></div>
+    <div class="reco-content">
+        <h4>✨ Recommended for you</h4>
+        <p class="text-muted mb-2" style="font-size: 0.9rem;">
+            Based on your recent swipes, here are some movies you might like:
+        </p>
+        <div id="reco-list" class="reco-grid"></div>
+        <div class="text-end mt-3">
+            <button id="reco-close" class="btn btn-dark">Back to swiping</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Visual button state (green/red glow)
     document.addEventListener("DOMContentLoaded", function () {
         const likeBtn = document.getElementById("like-btn");
         const dislikeBtn = document.getElementById("dislike-btn");
@@ -197,14 +285,123 @@
         if (likeBtn) {
             likeBtn.addEventListener("mousedown", () => {
                 likeBtn.classList.add("likeActive");
-                if (dislikeBtn) dislikeBtn.classList.remove("dislikeActive");
+                dislikeBtn && dislikeBtn.classList.remove("dislikeActive");
             });
         }
 
         if (dislikeBtn) {
             dislikeBtn.addEventListener("mousedown", () => {
                 dislikeBtn.classList.add("dislikeActive");
-                if (likeBtn) likeBtn.classList.remove("likeActive");
+                likeBtn && likeBtn.classList.remove("likeActive");
+            });
+        }
+    });
+
+    // Recommendation popup logic (every 10 swipes)
+    document.addEventListener("DOMContentLoaded", function () {
+        const usernameInput = document.getElementById("username-hidden");
+        const modal = document.getElementById("reco-modal");
+        const closeBtn = document.getElementById("reco-close");
+        const recoList = document.getElementById("reco-list");
+
+        console.log("DEBUG: swipe JS loaded");
+
+        if (!usernameInput || !modal || !recoList) {
+            console.log("DEBUG: missing elements", { usernameInput, modal, recoList });
+            return;
+        }
+
+        const username = usernameInput.value;
+        if (!username) {
+            console.log("DEBUG: no username");
+            return;
+        }
+
+        const key = "swipeCount_" + username;
+        let count = parseInt(localStorage.getItem(key) || "0", 10);
+        if (isNaN(count)) count = 0;
+
+        count += 1;
+        localStorage.setItem(key, String(count));
+
+        console.log("DEBUG: username =", username, "swipe count =", count);
+
+        if (count % 10 === 0) {
+            console.log("DEBUG: triggering recommendations fetch");
+
+            fetch("/api/recommendations/generate", {
+                method: "POST"
+            })
+            .then(async (res) => {
+                console.log("DEBUG: /api/recommendations/generate status =", res.status);
+                if (!res.ok) {
+                    throw new Error("Status " + res.status);
+                }
+                return res.json();
+            })
+            .then((data) => {
+                console.log("DEBUG: recommendations response", data);
+
+                if (!data || !Array.isArray(data.recommendations)) return;
+
+                recoList.innerHTML = "";
+
+                data.recommendations.forEach((movie) => {
+                    const card = document.createElement("div");
+                    card.className = "reco-card";
+
+                    const imgSrc = movie.poster_path
+                        ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+                        : null;
+
+                    if (imgSrc) {
+                        const img = document.createElement("img");
+                        img.src = imgSrc;
+                        img.alt = movie.title || "Movie poster";
+                        card.appendChild(img);
+                    }
+
+                    const body = document.createElement("div");
+                    body.className = "reco-card-body";
+
+                    const title = document.createElement("div");
+                    title.className = "reco-card-title";
+                    title.textContent = movie.title || "Untitled";
+                    body.appendChild(title);
+
+                    const overview = document.createElement("div");
+                    overview.className = "reco-card-text";
+                    overview.textContent = movie.overview || "No overview available.";
+                    body.appendChild(overview);
+
+                    const meta = document.createElement("div");
+                    meta.className = "reco-meta";
+                    const rating = movie.vote_average ? `⭐ ${movie.vote_average}` : "";
+                    const date = movie.release_date ? ` • 📅 ${movie.release_date}` : "";
+                    meta.textContent = rating + date;
+                    body.appendChild(meta);
+
+                    card.appendChild(body);
+                    recoList.appendChild(card);
+                });
+
+                modal.classList.add("show");
+            })
+            .catch((err) => {
+                console.warn("Could not load recommendations:", err.message);
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener("click", () => {
+                modal.classList.remove("show");
+            });
+        }
+
+        const backdrop = modal.querySelector(".reco-backdrop");
+        if (backdrop) {
+            backdrop.addEventListener("click", () => {
+                modal.classList.remove("show");
             });
         }
     });

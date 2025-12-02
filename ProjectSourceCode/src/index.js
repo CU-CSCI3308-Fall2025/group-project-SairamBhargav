@@ -384,6 +384,140 @@ app.post("/movies/dislike/:id", auth, async (req, res) => {
   }
 });
 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+// movie recommendation:
+app.post("/api/recommendations/generate", auth, async (req, res) => {
+  const username = req.session.username;
+
+  try {
+    // 1. get liked movies
+    const liked = await db.any(
+      `
+      SELECT movie_id FROM swipes 
+      WHERE username = $1 AND action = 'like'
+      `,
+      [username]
+    );
+
+    console.log("[Reco] user =", username, "liked count =", liked.length);
+
+    if (liked.length < 5) {
+      return res.status(400).json({
+        error: "Not enough liked movies to generate recommendations",
+      });
+    }
+
+    // 2. build JSON for Gemini from TMDB details
+    const likedMoviesDetailed = await Promise.all(
+      liked.map(async (m) => {
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/movie/${m.movie_id}`,
+          { params: { api_key: process.env.TMDB_API_KEY } }
+        );
+        const data = response.data;
+
+        return {
+          id: data.id,
+          title: data.title,
+          overview: data.overview,
+          genres: (data.genres || []).map((g) => g.name),
+          rating: data.vote_average,
+          popularity: data.popularity,
+        };
+      })
+    );
+
+    const prompt = `
+      You are a movie recommendation engine.
+      Analyze this list of movies the user liked:
+      ${JSON.stringify(likedMoviesDetailed)}
+
+      Recommend 10 movies the user would enjoy.
+      Only return JSON in this exact format, with nothing else:
+
+      {
+        "recommended": [123, 456, 789]
+      }
+    `;
+
+    // 3. call Gemini
+    const geminiResponse = await model.generateContent(prompt);
+
+    let text;
+    try {
+      text = geminiResponse.response.text();
+      console.log("[Reco] raw Gemini text =", text);
+    } catch (e) {
+      console.error("[Reco] error getting response.text()", e);
+      return res
+        .status(500)
+        .json({ error: "Bad response from recommendation model." });
+    }
+
+    // 4. Extract JSON from the text
+
+    // Default: assume the whole text is JSON
+    let jsonStr = text.trim();
+
+    // Case 1: wrapped in ```json ... ``` or ``` ... ```
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (codeBlockMatch && codeBlockMatch[1]) {
+      jsonStr = codeBlockMatch[1].trim();
+    } else {
+      // Case 2: find first {...} block
+      const braceMatch = text.match(/\{[\s\S]*\}/);
+      if (braceMatch) {
+        jsonStr = braceMatch[0].trim();
+      }
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch (parseErr) {
+      console.error("[Reco] JSON.parse failed", parseErr, "jsonStr =", jsonStr);
+      return res.status(500).json({
+        error:
+          "Failed to parse recommendation model output. Please try again later.",
+      });
+    }
+
+    const recommendedIds = parsed.recommended;
+
+    if (!Array.isArray(recommendedIds) || recommendedIds.length === 0) {
+      console.error("[Reco] recommendedIds invalid:", recommendedIds);
+      return res.status(500).json({
+        error: "Recommendation model did not return any movie IDs.",
+      });
+    }
+
+    console.log("[Reco] recommendedIds =", recommendedIds);
+
+    // 5. Fetch TMDB details for recommended movies
+    const recommendedMovies = await Promise.all(
+      recommendedIds.map(async (id) => {
+        const details = await axios.get(
+          `https://api.themoviedb.org/3/movie/${id}`,
+          { params: { api_key: process.env.TMDB_API_KEY } }
+        );
+        return details.data;
+      })
+    );
+
+    // 6. Success
+    res.json({
+      status: "success",
+      recommendations: recommendedMovies,
+    });
+  } catch (err) {
+    console.error("Error generating recommendations:", err);
+    res.status(500).json({ error: "Failed to generate recommendations." });
+  }
+});
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
