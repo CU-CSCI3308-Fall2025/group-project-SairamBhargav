@@ -1,97 +1,4 @@
-{{!-- {{> navbar }}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Swipe</title>
-</head>
-
-<style>
-
-    .card-footer d-flex justify-content-around bg-white border-top {
-        gap: 15px;
-    }
-    .likedBTN{
-        width: 60px;
-        height: 60px;
-        background-color: #d3f9d8;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        border-radius: 50%;
-        text-decoration: none;
-    }
-
-    .dislikedBTN{
-        width: 60px;
-        height: 60px;
-        background-color: #ffa8a8;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        border-radius: 50%;
-        text-decoration: none;
-    }
-
-</style>
-
-<body>
-    
-    
-    <div class="container mt-4">
-        {{#if error}}
-        <div class="alert alert-danger">{{error}}</div>
-        {{/if}}
-    
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    {{#if movie.posterPath}}
-                    <img src="{{movie.posterPath}}" class="card-img-top" alt="{{movie.title}}" />
-                    {{else}}
-                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
-                        style="height: 450px;">
-                        <span class="text-white"></span>
-                    </div>
-                    {{/if}}
-                    <div class="card-body">
-                        <h5 class="card-title">{{movie.title}}</h5>
-                        <p class="card-text">{{movie.overview}}</p>
-                        <p class="text-muted">Rating: {{movie.rating}}/10</p>
-                        <p class="text-muted">Release: {{movie.releaseDate}}</p>
-                    </div>
-                    <div class="card-footer d-flex justify-content-around bg-white border-top">
-                        <form method="POST" action="/movies/dislike/{{movie.id}}" class="flex-fill ms-2">
-                            <button type="submit" class="btns dislikedBTN">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b" viewBox="0 0 256 256">
-                                    <path
-                                        d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                                    </path>
-                                </svg>
-                            </button>
-                        </form>
-
-                        <form method="POST" action="/movies/like/{{movie.id}}" class="flex-fill me-2">
-                            <button type="submit" class="btns likedBTN">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44" viewBox="0 0 256 256">
-                                    <path
-                                        d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
-                                    </path>
-                                </svg>
-                            </button>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html> --}}
+{{!-- views/pages/swipe.hbs --}}
 
 <style>
     .swipe-row {
@@ -200,20 +107,18 @@
     {{#if movie}}
 
     <div class="row swipe-row mt-3 justify-content-center align-items-center">
-        
-        {{!-- Get input for the JS side --}}
-        <input type="hidden" id="movie-id" value="{{movie.id}}">
-        <input type="hidden" id="username" value="{{username}}">
 
         <!-- LEFT DISLIKE BUTTON -->
         <div class="col-2 text-center">
-            <button id="dislike-btn" class="bigVoteBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b" viewBox="0 0 256 256">
-                    <path
-                        d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                    </path>
-                </svg>
-            </button>
+            <form method="POST" action="/movies/dislike/{{movie.id}}">
+                <button type="submit" id="dislike-btn" class="bigVoteBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b" viewBox="0 0 256 256">
+                        <path
+                            d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
+                        </path>
+                    </svg>
+                </button>
+            </form>
         </div>
 
         <!-- POSTER + HOVER INFO -->
@@ -240,13 +145,13 @@
                                 <path
                                     d="M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z">
                                 </path>
-                            </svg> 
+                            </svg>
                             Rating: {{movie.rating}}/10 <br>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#b5b512" viewBox="0 0 256 256">
-                                    <path
-                                        d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-96-88v64a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm59.16,30.45L152,176h16a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136,23.76,23.76,0,0,1,171.16,150.45Z">
-                                    </path>
-                                </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#b5b512" viewBox="0 0 256 256">
+                                <path
+                                    d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-96-88v64a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm59.16,30.45L152,176h16a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136,23.76,23.76,0,0,1,171.16,150.45Z">
+                                </path>
+                            </svg>
                             Release: {{movie.releaseDate}}
                         </div>
                     </div>
@@ -258,13 +163,15 @@
 
         <!-- RIGHT LIKE BUTTON -->
         <div class="col-2 text-center">
-            <button id="like-btn" class="bigVoteBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44" viewBox="0 0 256 256">
-                    <path
-                        d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
-                    </path>
-                </svg>
-            </button>
+            <form method="POST" action="/movies/like/{{movie.id}}">
+                <button type="submit" id="like-btn" class="bigVoteBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44" viewBox="0 0 256 256">
+                        <path
+                            d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
+                        </path>
+                    </svg>
+                </button>
+            </form>
         </div>
 
     </div>
@@ -287,35 +194,18 @@
         const likeBtn = document.getElementById("like-btn");
         const dislikeBtn = document.getElementById("dislike-btn");
 
-        likeBtn.addEventListener("click", () => {
-            likeBtn.classList.add("likeActive");
-            dislikeBtn.classList.remove("dislikeActive");
-        });
+        if (likeBtn) {
+            likeBtn.addEventListener("mousedown", () => {
+                likeBtn.classList.add("likeActive");
+                if (dislikeBtn) dislikeBtn.classList.remove("dislikeActive");
+            });
+        }
 
-        dislikeBtn.addEventListener("click", () => {
-            dislikeBtn.classList.add("dislikeActive");
-            likeBtn.classList.remove("likeActive");
-        });
+        if (dislikeBtn) {
+            dislikeBtn.addEventListener("mousedown", () => {
+                dislikeBtn.classList.add("dislikeActive");
+                if (likeBtn) likeBtn.classList.remove("likeActive");
+            });
+        }
     });
-
-    document.addEventListener('DOMContentLoaded', function () {
-            const like = document.getElementById('like-btn');
-            const dislike = document.getElementById('dislike-btn');
-
-            const movieId = document.getElementById('movie-id')?.value;
-            const username = document.getElementById('username')?.textContent;
-
-            if (like) {
-                like.addEventListener('click', function () {
-                    recordSwipe('like', movieId, username);
-                });
-            }
-
-            if (dislike) {
-                dislike.addEventListener('click', function () {
-                    recordSwipe('dislike', movieId, username);
-                });
-            }
-        });
-  
 </script>

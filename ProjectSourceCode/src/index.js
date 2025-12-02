@@ -109,19 +109,18 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Minimum password length, must be 8 characters mimimum
-  if (password.length < 8) {
-    return res.render("pages/register", {
-      message: "Registration failed. Password must be at least 8 characters.",
-      error: true,
-    });
-  }
+    if (password.length < 8) {
+      return res.render("pages/register", {
+        message: "Registration failed. Password must be at least 8 characters.",
+        error: true,
+      });
+    }
 
     // insert user into database
     await db.none(
       `INSERT INTO users (username, password, firstName, lastName, email, dateOfBirth)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [username, hashedPassword, firstName, lastName, email, dateOfBirth]
-
     );
 
     res.render("pages/register", {
@@ -212,14 +211,13 @@ app.get("/discover", auth, async (req, res) => {
     res.render("pages/discover", {
       movies: [],
       error: "Failed to load movies",
-      });
+    });
   }
 });
-  // Authentication Required
-  app.use(auth);
+// Authentication Required
+app.use(auth);
 
-
-  // --- PROFILE ROUTE ---
+// --- PROFILE ROUTE ---
 app.get("/profile", async (req, res) => {
   const username = req.session.username; // or however you store the logged-in user
 
@@ -236,31 +234,40 @@ app.get("/profile", async (req, res) => {
     );
 
     // --- Get most liked genre ---
-    const topGenre = await db.query(`
+    const topGenre = await db.query(
+      `
       SELECT genre FROM liked_movies
       WHERE username = $1
       GROUP BY genre
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Get most liked actor ---
-    const topActor = await db.query(`
+    const topActor = await db.query(
+      `
       SELECT actor FROM liked_movies
       WHERE username = $1
       GROUP BY actor
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Get most liked actress ---
-    const topActress = await db.query(`
+    const topActress = await db.query(
+      `
       SELECT actress FROM liked_movies
       WHERE username = $1
       GROUP BY actress
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Render the profile page ---
     res.render("pages/profile", {
@@ -289,91 +296,93 @@ app.get("/profile", async (req, res) => {
 });
 
 // Swipe feature route
-app.get('/swipe', async (req, res) => {
+app.get("/swipe", async (req, res) => {
   try {
     // Fetch a random movie from TMDB
     const randomPage = Math.floor(Math.random() * 500) + 1;
-    
+
     const response = await fetch(
       `https://api.themoviedb.org/3/movie/popular?api_key=98d9665b319075a5eaf64410976293ab&page=${randomPage}`
     );
-    
+
     const data = await response.json();
-    
+
     // Pick a random movie from the results
     const randomIndex = Math.floor(Math.random() * data.results.length);
     const movieData = data.results[randomIndex];
-    
+
     // Format the movie data
     const movie = {
       id: movieData.id,
       title: movieData.title,
-      overview: movieData.overview || 'No overview available.',
-      posterPath: movieData.poster_path 
-        ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` 
+      overview: movieData.overview || "No overview available.",
+      posterPath: movieData.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}`
         : null,
-      rating: movieData.vote_average ? movieData.vote_average.toFixed(1) : 'N/A',
-      releaseDate: movieData.release_date || 'Unknown'
+      rating: movieData.vote_average
+        ? movieData.vote_average.toFixed(1)
+        : "N/A",
+      releaseDate: movieData.release_date || "Unknown",
     };
-    
+
     // Render the swipe template with the movie data
-    res.render('pages/swipe', {
+    res.render("pages/swipe", {
       username: req.session.username || req.user?.username,
-      movie: movie
+      movie: movie,
     });
-    
   } catch (error) {
-    console.error('Error fetching random movie:', error);
-    res.render('pages/swipe', {
+    console.error("Error fetching random movie:", error);
+    res.render("pages/swipe", {
       username: req.session.username || req.user?.username,
-      error: 'Failed to load movie. Please try again.',
-      movie: null
+      error: "Failed to load movie. Please try again.",
+      movie: null,
     });
   }
 });
 
 app.post("/movies/like/:id", auth, async (req, res) => {
-    const username = req.session.username;
-    const movieId = req.params.id;
+  const username = req.session.username;
+  const movieId = parseInt(req.params.id, 10); // make sure it's an integer
 
-    try {
-        await db.none(
-            `INSERT INTO swipes(username, movie_id, action)
-            VALUES($1, $2, 'like')
-            ON CONFLICT(username, movie_id)
-            DO UPDATE SET action = 'like'`,
-            [username, movieId]
-        );
+  try {
+    await db.none(
+      `
+      INSERT INTO swipes (username, movie_id, action)
+      VALUES ($1, $2, 'like')
+      ON CONFLICT (username, movie_id)
+      DO UPDATE SET action = EXCLUDED.action
+      `,
+      [username, movieId]
+    );
 
-        res.redirect("/swipe");
-    } 
-    catch (err) {
-        console.error("Error saving like swipe:", err);
-        res.status(500).send("Failed to save swipe");
-    }
+    res.redirect("/swipe");
+  } catch (err) {
+    console.error("Error saving like swipe:", err.message, err);
+    res.status(500).send("Failed to save swipe");
+  }
 });
 
 app.post("/movies/dislike/:id", auth, async (req, res) => {
-    const username = req.session.username;
-    const movieId = req.params.id;
+  const username = req.session.username;
+  const movieId = parseInt(req.params.id, 10);
 
-    try {
-        await db.none(
-            `INSERT INTO swipes(username, movie_id, action)
-            VALUES($1, $2, 'dislike')
-            ON CONFLICT(username, movie_id)
-            DO UPDATE SET action = 'dislike'`,
-            [username, movieId]
-        );
+  try {
+    await db.none(
+      `
+      INSERT INTO swipes (username, movie_id, action)
+      VALUES ($1, $2, 'dislike')
+      ON CONFLICT (username, movie_id)
+      DO UPDATE SET action = EXCLUDED.action
+      `,
+      [username, movieId]
+    );
 
-        res.redirect("/swipe");
-    } 
-    catch (err) {
-        console.error("Error saving dislike swipe:", err);
-        res.status(500).send("Failed to save swipe");
-    }
+    res.redirect("/swipe");
+  } catch (err) {
+    console.error("Error saving dislike swipe:", err.message, err);
+    res.status(500).send("Failed to save swipe");
+  }
 });
-
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
