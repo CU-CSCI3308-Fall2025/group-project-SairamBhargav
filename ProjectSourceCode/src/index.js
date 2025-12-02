@@ -109,19 +109,18 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Minimum password length, must be 8 characters mimimum
-  if (password.length < 8) {
-    return res.render("pages/register", {
-      message: "Registration failed. Password must be at least 8 characters.",
-      error: true,
-    });
-  }
+    if (password.length < 8) {
+      return res.render("pages/register", {
+        message: "Registration failed. Password must be at least 8 characters.",
+        error: true,
+      });
+    }
 
     // insert user into database
     await db.none(
       `INSERT INTO users (username, password, firstName, lastName, email, dateOfBirth)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [username, hashedPassword, firstName, lastName, email, dateOfBirth]
-
     );
 
     res.render("pages/register", {
@@ -212,14 +211,13 @@ app.get("/discover", auth, async (req, res) => {
     res.render("pages/discover", {
       movies: [],
       error: "Failed to load movies",
-      });
+    });
   }
 });
-  // Authentication Required
-  app.use(auth);
+// Authentication Required
+app.use(auth);
 
-
-  // --- PROFILE ROUTE ---
+// --- PROFILE ROUTE ---
 app.get("/profile", async (req, res) => {
   const username = req.session.username; // or however you store the logged-in user
 
@@ -236,31 +234,40 @@ app.get("/profile", async (req, res) => {
     );
 
     // --- Get most liked genre ---
-    const topGenre = await db.query(`
+    const topGenre = await db.query(
+      `
       SELECT genre FROM liked_movies
       WHERE username = $1
       GROUP BY genre
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Get most liked actor ---
-    const topActor = await db.query(`
+    const topActor = await db.query(
+      `
       SELECT actor FROM liked_movies
       WHERE username = $1
       GROUP BY actor
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Get most liked actress ---
-    const topActress = await db.query(`
+    const topActress = await db.query(
+      `
       SELECT actress FROM liked_movies
       WHERE username = $1
       GROUP BY actress
       ORDER BY COUNT(*) DESC
       LIMIT 1
-    `, [username]);
+    `,
+      [username]
+    );
 
     // --- Render the profile page ---
     res.render("pages/profile", {
@@ -289,91 +296,227 @@ app.get("/profile", async (req, res) => {
 });
 
 // Swipe feature route
-app.get('/swipe', async (req, res) => {
+app.get("/swipe", async (req, res) => {
   try {
     // Fetch a random movie from TMDB
     const randomPage = Math.floor(Math.random() * 500) + 1;
-    
+
     const response = await fetch(
       `https://api.themoviedb.org/3/movie/popular?api_key=98d9665b319075a5eaf64410976293ab&page=${randomPage}`
     );
-    
+
     const data = await response.json();
-    
+
     // Pick a random movie from the results
     const randomIndex = Math.floor(Math.random() * data.results.length);
     const movieData = data.results[randomIndex];
-    
+
     // Format the movie data
     const movie = {
       id: movieData.id,
       title: movieData.title,
-      overview: movieData.overview || 'No overview available.',
-      posterPath: movieData.poster_path 
-        ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` 
+      overview: movieData.overview || "No overview available.",
+      posterPath: movieData.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}`
         : null,
-      rating: movieData.vote_average ? movieData.vote_average.toFixed(1) : 'N/A',
-      releaseDate: movieData.release_date || 'Unknown'
+      rating: movieData.vote_average
+        ? movieData.vote_average.toFixed(1)
+        : "N/A",
+      releaseDate: movieData.release_date || "Unknown",
     };
-    
+
     // Render the swipe template with the movie data
-    res.render('pages/swipe', {
+    res.render("pages/swipe", {
       username: req.session.username || req.user?.username,
-      movie: movie
+      movie: movie,
     });
-    
   } catch (error) {
-    console.error('Error fetching random movie:', error);
-    res.render('pages/swipe', {
+    console.error("Error fetching random movie:", error);
+    res.render("pages/swipe", {
       username: req.session.username || req.user?.username,
-      error: 'Failed to load movie. Please try again.',
-      movie: null
+      error: "Failed to load movie. Please try again.",
+      movie: null,
     });
   }
 });
 
 app.post("/movies/like/:id", auth, async (req, res) => {
-    const username = req.session.username;
-    const movieId = req.params.id;
+  const username = req.session.username;
+  const movieId = parseInt(req.params.id, 10); // make sure it's an integer
 
-    try {
-        await db.none(
-            `INSERT INTO swipes(username, movie_id, action)
-            VALUES($1, $2, 'like')
-            ON CONFLICT(username, movie_id)
-            DO UPDATE SET action = 'like'`,
-            [username, movieId]
-        );
+  try {
+    await db.none(
+      `
+      INSERT INTO swipes (username, movie_id, action)
+      VALUES ($1, $2, 'like')
+      ON CONFLICT (username, movie_id)
+      DO UPDATE SET action = EXCLUDED.action
+      `,
+      [username, movieId]
+    );
 
-        res.redirect("/swipe");
-    } 
-    catch (err) {
-        console.error("Error saving like swipe:", err);
-        res.status(500).send("Failed to save swipe");
-    }
+    res.redirect("/swipe");
+  } catch (err) {
+    console.error("Error saving like swipe:", err.message, err);
+    res.status(500).send("Failed to save swipe");
+  }
 });
 
 app.post("/movies/dislike/:id", auth, async (req, res) => {
-    const username = req.session.username;
-    const movieId = req.params.id;
+  const username = req.session.username;
+  const movieId = parseInt(req.params.id, 10);
 
-    try {
-        await db.none(
-            `INSERT INTO swipes(username, movie_id, action)
-            VALUES($1, $2, 'dislike')
-            ON CONFLICT(username, movie_id)
-            DO UPDATE SET action = 'dislike'`,
-            [username, movieId]
-        );
+  try {
+    await db.none(
+      `
+      INSERT INTO swipes (username, movie_id, action)
+      VALUES ($1, $2, 'dislike')
+      ON CONFLICT (username, movie_id)
+      DO UPDATE SET action = EXCLUDED.action
+      `,
+      [username, movieId]
+    );
 
-        res.redirect("/swipe");
-    } 
-    catch (err) {
-        console.error("Error saving dislike swipe:", err);
-        res.status(500).send("Failed to save swipe");
-    }
+    res.redirect("/swipe");
+  } catch (err) {
+    console.error("Error saving dislike swipe:", err.message, err);
+    res.status(500).send("Failed to save swipe");
+  }
 });
 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+// movie recommendation:
+app.post("/api/recommendations/generate", auth, async (req, res) => {
+  const username = req.session.username;
+
+  try {
+    // 1. get liked movies
+    const liked = await db.any(
+      `
+      SELECT movie_id FROM swipes 
+      WHERE username = $1 AND action = 'like'
+      `,
+      [username]
+    );
+
+    console.log("[Reco] user =", username, "liked count =", liked.length);
+
+    if (liked.length < 5) {
+      return res.status(400).json({
+        error: "Not enough liked movies to generate recommendations",
+      });
+    }
+
+    // 2. build JSON for Gemini from TMDB details
+    const likedMoviesDetailed = await Promise.all(
+      liked.map(async (m) => {
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/movie/${m.movie_id}`,
+          { params: { api_key: process.env.TMDB_API_KEY } }
+        );
+        const data = response.data;
+
+        return {
+          id: data.id,
+          title: data.title,
+          overview: data.overview,
+          genres: (data.genres || []).map((g) => g.name),
+          rating: data.vote_average,
+          popularity: data.popularity,
+        };
+      })
+    );
+
+    const prompt = `
+      You are a movie recommendation engine.
+      Analyze this list of movies the user liked:
+      ${JSON.stringify(likedMoviesDetailed)}
+
+      Recommend 10 movies the user would enjoy.
+      Only return JSON in this exact format, with nothing else:
+
+      {
+        "recommended": [123, 456, 789]
+      }
+    `;
+
+    // 3. call Gemini
+    const geminiResponse = await model.generateContent(prompt);
+
+    let text;
+    try {
+      text = geminiResponse.response.text();
+      console.log("[Reco] raw Gemini text =", text);
+    } catch (e) {
+      console.error("[Reco] error getting response.text()", e);
+      return res
+        .status(500)
+        .json({ error: "Bad response from recommendation model." });
+    }
+
+    // 4. Extract JSON from the text
+
+    // Default: assume the whole text is JSON
+    let jsonStr = text.trim();
+
+    // Case 1: wrapped in ```json ... ``` or ``` ... ```
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (codeBlockMatch && codeBlockMatch[1]) {
+      jsonStr = codeBlockMatch[1].trim();
+    } else {
+      // Case 2: find first {...} block
+      const braceMatch = text.match(/\{[\s\S]*\}/);
+      if (braceMatch) {
+        jsonStr = braceMatch[0].trim();
+      }
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch (parseErr) {
+      console.error("[Reco] JSON.parse failed", parseErr, "jsonStr =", jsonStr);
+      return res.status(500).json({
+        error:
+          "Failed to parse recommendation model output. Please try again later.",
+      });
+    }
+
+    const recommendedIds = parsed.recommended;
+
+    if (!Array.isArray(recommendedIds) || recommendedIds.length === 0) {
+      console.error("[Reco] recommendedIds invalid:", recommendedIds);
+      return res.status(500).json({
+        error: "Recommendation model did not return any movie IDs.",
+      });
+    }
+
+    console.log("[Reco] recommendedIds =", recommendedIds);
+
+    // 5. Fetch TMDB details for recommended movies
+    const recommendedMovies = await Promise.all(
+      recommendedIds.map(async (id) => {
+        const details = await axios.get(
+          `https://api.themoviedb.org/3/movie/${id}`,
+          { params: { api_key: process.env.TMDB_API_KEY } }
+        );
+        return details.data;
+      })
+    );
+
+    // 6. Success
+    res.json({
+      status: "success",
+      recommendations: recommendedMovies,
+    });
+  } catch (err) {
+    console.error("Error generating recommendations:", err);
+    res.status(500).json({ error: "Failed to generate recommendations." });
+  }
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
