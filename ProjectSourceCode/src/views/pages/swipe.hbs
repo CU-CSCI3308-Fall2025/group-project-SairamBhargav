@@ -87,8 +87,8 @@
         background-color: #ffa8a8;
         border: 3px solid #e00b0b;
     }
-    
-    #like-btn {
+
+        #like-btn {
         background: linear-gradient(to right, #d3f9d8 50%, #ffffff 50%);
         background-size: 200% 100%;
         background-position: right bottom;
@@ -123,7 +123,8 @@
     .reco-modal {
         position: fixed;
         inset: 0;
-        display: none; /* hidden by default */
+        display: none;
+        /* hidden by default */
         align-items: center;
         justify-content: center;
         z-index: 1050;
@@ -148,7 +149,7 @@
         max-height: 80vh;
         padding: 20px;
         overflow-y: auto;
-        box-shadow: 0 0 30px rgba(0,0,0,0.35);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.35);
     }
 
     .reco-grid {
@@ -281,9 +282,9 @@
 
     <!-- NEXT MOVIE BUTTON BELOW EVERYTHING -->
     <div class="text-center mt-4">
-            <a href="/swipe" id = "skip-btn" class="btn btn-dark btn-lg px-4">
-                Skip
-            </a>
+        <a href="/swipe" id = "skip-btn" class="btn btn-dark btn-lg px-4">
+            Skip
+        </a>
     </div>
 
     {{else}}
@@ -363,64 +364,64 @@
             fetch("/api/recommendations/generate", {
                 method: "POST"
             })
-            .then(async (res) => {
-                console.log("DEBUG: /api/recommendations/generate status =", res.status);
-                if (!res.ok) {
-                    throw new Error("Status " + res.status);
-                }
-                return res.json();
-            })
-            .then((data) => {
-                console.log("DEBUG: recommendations response", data);
-
-                if (!data || !Array.isArray(data.recommendations)) return;
-
-                recoList.innerHTML = "";
-
-                data.recommendations.forEach((movie) => {
-                    const card = document.createElement("div");
-                    card.className = "reco-card";
-
-                    const imgSrc = movie.poster_path
-                        ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
-                        : null;
-
-                    if (imgSrc) {
-                        const img = document.createElement("img");
-                        img.src = imgSrc;
-                        img.alt = movie.title || "Movie poster";
-                        card.appendChild(img);
+                .then(async (res) => {
+                    console.log("DEBUG: /api/recommendations/generate status =", res.status);
+                    if (!res.ok) {
+                        throw new Error("Status " + res.status);
                     }
+                    return res.json();
+                })
+                .then((data) => {
+                    console.log("DEBUG: recommendations response", data);
 
-                    const body = document.createElement("div");
-                    body.className = "reco-card-body";
+                    if (!data || !Array.isArray(data.recommendations)) return;
 
-                    const title = document.createElement("div");
-                    title.className = "reco-card-title";
-                    title.textContent = movie.title || "Untitled";
-                    body.appendChild(title);
+                    recoList.innerHTML = "";
 
-                    const overview = document.createElement("div");
-                    overview.className = "reco-card-text";
-                    overview.textContent = movie.overview || "No overview available.";
-                    body.appendChild(overview);
+                    data.recommendations.forEach((movie) => {
+                        const card = document.createElement("div");
+                        card.className = "reco-card";
 
-                    const meta = document.createElement("div");
-                    meta.className = "reco-meta";
-                    const rating = movie.vote_average ? `⭐ ${movie.vote_average}` : "";
-                    const date = movie.release_date ? ` • 📅 ${movie.release_date}` : "";
-                    meta.textContent = rating + date;
-                    body.appendChild(meta);
+                        const imgSrc = movie.poster_path
+                            ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+                            : null;
 
-                    card.appendChild(body);
-                    recoList.appendChild(card);
+                        if (imgSrc) {
+                            const img = document.createElement("img");
+                            img.src = imgSrc;
+                            img.alt = movie.title || "Movie poster";
+                            card.appendChild(img);
+                        }
+
+                        const body = document.createElement("div");
+                        body.className = "reco-card-body";
+
+                        const title = document.createElement("div");
+                        title.className = "reco-card-title";
+                        title.textContent = movie.title || "Untitled";
+                        body.appendChild(title);
+
+                        const overview = document.createElement("div");
+                        overview.className = "reco-card-text";
+                        overview.textContent = movie.overview || "No overview available.";
+                        body.appendChild(overview);
+
+                        const meta = document.createElement("div");
+                        meta.className = "reco-meta";
+                        const rating = movie.vote_average ? `⭐ ${movie.vote_average}` : "";
+                        const date = movie.release_date ? ` • 📅 ${movie.release_date}` : "";
+                        meta.textContent = rating + date;
+                        body.appendChild(meta);
+
+                        card.appendChild(body);
+                        recoList.appendChild(card);
+                    });
+
+                    modal.classList.add("show");
+                })
+                .catch((err) => {
+                    console.warn("Could not load recommendations:", err.message);
                 });
-
-                modal.classList.add("show");
-            })
-            .catch((err) => {
-                console.warn("Could not load recommendations:", err.message);
-            });
         }
 
         if (closeBtn) {
