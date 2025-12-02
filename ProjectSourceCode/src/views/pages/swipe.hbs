@@ -318,25 +318,51 @@
             }
         });
 
-        async function recordSwipe(action, movieId, username) {
-            try {
-                const response = await fetch('/api/swipe',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            username: username,
-                            movie_id: movieId,
-                            action: action
-                        })
-                    });
-            }
+    app.post("/movies/like/:id", auth, async (req, res) => {
+        const username = req.session.username;
+        const movieId = req.params.id; // TMDB id from the template
 
-            catch (error) {
-                console.error('Error:', error);
-                alert('Error');
-            }
+        try {
+            await db.none(
+
+                INSERT INTO swipes(username, movie_id, action)
+                VALUES($1, $2, 'like')
+                ON CONFLICT(username, movie_id)
+                DO UPDATE SET action = 'like',
+                [username, movieId]
+            );
+
+            // show the next swipe card
+            res.redirect("/swipe");
+        } 
+        catch (err) {
+            console.error("Error saving like swipe:", err);
+            res.status(500).send("Failed to save swipe");
         }
+    });
+
+    // user dislikes a movie
+    app.post("/movies/dislike/:id", auth, async (req, res) => {
+        const username = req.session.username;
+        const movieId = req.params.id;
+
+        try {
+            await db.none(
+
+            INSERT INTO swipes(username, movie_id, action)
+            VALUES($1, $2, 'dislike')
+            ON CONFLICT(username, movie_id)
+            DO UPDATE SET action = 'dislike'
+                        ,
+                        [username, movieId]
+                    );
+
+            res.redirect("/swipe");
+        } 
+        catch (err) {
+            console.error("Error saving dislike swipe:", err);
+            res.status(500).send("Failed to save swipe");
+        }
+    });
+  
 </script>
