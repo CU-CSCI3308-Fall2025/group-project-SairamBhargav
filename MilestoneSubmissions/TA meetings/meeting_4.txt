@@ -1,0 +1,27 @@
+TA Meeting Log- 11/18
+
+Bhargav- has been researching ways for the algorithm, he chose to go with ai method→ waiting for Neville and Ryan to finish the swipe page so that he can implement the swipe page.
+
+Charlie- has done the API route, and liked page bank. Needs to discuss with Ryan on getting the swiped movies into the liked page.
+
+Ryan - got the swipe page done, pulls randomly right now so needs to work with Bhargav to get the algorithm tailored to user preference. 
+
+Neville-  Made the front end for the swipe feature and now plans on getting the buttons(liked and disliked ) linked to the database.
+
+Aswaanth- Finished username recommendation, needs to finish profile page features like forgot password and email confirmation when registering. 
+
+Karson- N/A
+
+
+Extra Notes: 
+Still thinking about 2 people session
+Project should be working and done by end of this week
+In this week's lab we will host the project.
+Can make 2 links, one link with the simple working full project, and another link that maybe we can add other stuff.
+
+TO DO:
+Most important feature to get done is swipe page
+Update project board
+Also make sure to make release notes
+Sign up for project presentation slot
+Have a git ignore file

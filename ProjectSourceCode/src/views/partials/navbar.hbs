@@ -1,13 +1,27 @@
 <header>
-  <nav class="navbar navbar-expand-lg" style="background-color: #e6ddff;">
+  <nav
+    class="navbar navbar-expand-lg"
+    style="
+      background-color: #e6ddff;
+      font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    "
+  >
     <div class="container-fluid">
 
-      <!-- Brand -->
-      <a class="navbar-brand" href="/discover" style="color: #4b2e83; font-weight: 600;">
+      <a
+        class="navbar-brand"
+        href="/discover"
+        style="
+          color: #4b2e83;
+          font-weight: 700;
+          font-family: 'Fredoka One', 'Poppins', system-ui, sans-serif;
+          letter-spacing: 0.5px;
+          font-size: 1.6rem;
+        "
+      >
         🎬 MatchFlix
       </a>
 
-      <!-- Mobile Toggle -->
       <button
         class="navbar-toggler ms-auto"
         type="button"
@@ -15,24 +29,53 @@
         data-bs-target="#navbar-collapse"
         aria-controls="navbar-collapse"
         aria-expanded="false"
-        aria-label="Toggle navigation">
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Navbar Content -->
       <div class="collapse navbar-collapse" id="navbar-collapse">
 
-        <!-- Left side links -->
+        <!-- LEFT NAV LINKS -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
           <li class="nav-item">
-            <a class="nav-link" href="/discover" style="color: #4b2e83;">Discover Page</a>
+            <a
+              class="nav-link"
+              href="/discover"
+              style="
+                color: #4b2e83;
+                font-weight: 600;
+                font-size: 1.15rem;
+                padding: 8px 14px;
+                letter-spacing: 0.3px;
+                font-family: 'Poppins', sans-serif;
+              "
+            >
+              Discover
+            </a>
           </li>
+
           <li class="nav-item">
-            <a class="nav-link" href="/swipe" style="color: #4b2e83;">Swipe Page</a>
+            <a
+              class="nav-link"
+              href="/swipe"
+              style="
+                color: #4b2e83;
+                font-weight: 600;
+                font-size: 1.15rem;
+                padding: 8px 14px;
+                letter-spacing: 0.3px;
+                font-family: 'Poppins', sans-serif;
+              "
+            >
+              Swipe
+            </a>
           </li>
+
         </ul>
 
-        <!-- Right side profile dropdown -->
+        <!-- RIGHT SIDE PROFILE DROPDOWN -->
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item dropdown">
             <a
@@ -42,21 +85,31 @@
               role="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
-              style="color: #4b2e83;">
-              <span class="me-1">👤</span>
+              style="
+                color: #4f377e;
+                font-weight: 600;
+                font-size: 1.15rem;
+                padding: 8px 14px;
+                letter-spacing: 0.3px;
+                font-family: 'Poppins', sans-serif;
+              "
+            >
+              <span class="me-2" style="font-size: 1.25rem;">👤</span>
               <span>Profile</span>
             </a>
 
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="background-color: #8057f2;">
+            <ul
+              class="dropdown-menu dropdown-menu-end"
+              aria-labelledby="profileDropdown"
+              style="background-color: #9778ef;"
+            >
               <li><a class="dropdown-item" href="/profile">Profile</a></li>
-              <li><a class="dropdown-item" href="/login">Login</a></li>
-              <li><a class="dropdown-item" href="/register">Register</a></li>
+              <li><a class="dropdown-item" href="/login">Logout</a></li>
             </ul>
           </li>
         </ul>
 
       </div>
-
     </div>
   </nav>
 </header>
