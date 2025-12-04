@@ -9,6 +9,49 @@ const session = require("express-session"); // To set the session object. To sto
 const bcrypt = require("bcryptjs"); //  To hash passwords
 const axios = require("axios"); // To make HTTP requests from our server.
 
+// --- OpenAI (for username recommendations) ---
+const OpenAI = require("openai");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+app.post("/suggest-username", async (req, res) => {
+  const { firstName, lastName, birthYear } = req.body;
+
+  try {
+    const prompt = `
+      Create 5 unique, fun, and available-looking usernames based on:
+      First name: ${firstName}
+      Last name: ${lastName}
+      Birth year: ${birthYear}
+      Use mixes like initials, reversed names, year combos, etc.
+      Only return a JSON array of strings.
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.7
+    });
+
+    const suggestions = JSON.parse(response.choices[0].message.content);
+
+    res.json({ suggestions });
+
+  } catch (err) {
+    console.error("Username suggestion error:", err);
+    res.json({
+      suggestions: [
+        `${firstName}${lastName}${birthYear}`,
+        `${firstName}_${birthYear}`,
+        `${firstName.charAt(0)}${lastName}${birthYear}`,
+      ]
+    });
+  }
+});
+
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
