@@ -264,6 +264,7 @@ app.get("/liked", async (req, res) => {
     SELECT movie_id
     FROM swipes
     WHERE username = $1 AND action = 'like'
+    ORDER BY created_at DESC
   `;
 
   try {
