@@ -258,30 +258,37 @@ app.get("/profile", async (req, res) => {
   }
 });
 
-// ---------- LIKED MOVIES PAGE (from swipes + TMDB) ----------
+app.get('/liked', async (req,res) => {
 
-app.get("/liked", async (req, res) => {
   const username = req.session.username;
+  const query = `
+    SELECT movie_id
+    FROM swipes
+    WHERE username = $1 AND action = 'like'
+  `
+  const apiKey = process.env.TMDB_API_KEY;
+  try{
 
-  try {
-    // Get all liked movie IDs from swipes
-    const likedMoviesIDs = await db.any(
-      `
-      SELECT movie_id
-      FROM swipes
-      WHERE username = $1 AND action = 'like'
-      `,
-      [username]
-    );
+    const likedMoviesIDs = await db.any(query, [username]);
 
-    const likedMovies = await Promise.all(
-      likedMoviesIDs.map(async (row) => {
-        const tmdbId = row.movie_id;
+    const likedMoviesAPI = [];
 
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/movie/${tmdbId}`,
-          { params: { api_key: process.env.TMDB_API_KEY } }
-        );
+    for (const row of likedMoviesIDs) {
+      const movieID = row.movie_id;
+
+      const url = `https://api.themoviedb.org/3/movie/${movieID}?api_key=${apiKey}&language=en-US`;
+ 
+      try {
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        likedMoviesAPI.push(data);
+
+      } catch (err) {
+        console.error(`Error fetching ${movieID}:`, err);
+        likedMoviesAPI.push(null);
+      }
 
         const movie = response.data;
 
