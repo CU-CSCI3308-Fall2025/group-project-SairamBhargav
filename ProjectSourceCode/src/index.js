@@ -258,61 +258,71 @@ app.get("/profile", async (req, res) => {
   }
 });
 
-app.get('/liked', async (req,res) => {
-
+app.get("/liked", async (req, res) => {
   const username = req.session.username;
+  const apiKey = process.env.TMDB_API_KEY;
+
   const query = `
     SELECT movie_id
     FROM swipes
     WHERE username = $1 AND action = 'like'
-  `
-  const apiKey = process.env.TMDB_API_KEY;
-  try{
+  `;
 
+  try {
+    // Get all liked movie IDs
     const likedMoviesIDs = await db.any(query, [username]);
 
-    const likedMoviesAPI = [];
-
-    for (const row of likedMoviesIDs) {
-      const movieID = row.movie_id;
-
-      const url = `https://api.themoviedb.org/3/movie/${movieID}?api_key=${apiKey}&language=en-US`;
- 
-      try {
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        likedMoviesAPI.push(data);
-
-      } catch (err) {
-        console.error(`Error fetching ${movieID}:`, err);
-        likedMoviesAPI.push(null);
-      }
-
+    if (likedMoviesIDs.length === 0) {
+      return res.render("pages/liked", {
+        movies: [],
+        username,
+      });
     }
 
-    const likedMovies = likedMoviesAPI.map((movie) => ({
-      id: movie.id,
-      title: movie.title,
-      overview: movie.overview,
-      posterPath: movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : null,
-      releaseDate: movie.release_date,
-      rating: movie.vote_average,
-    }));
+    // Build movie objects from TMDB API
+    const movies = await Promise.all(
+      likedMoviesIDs.map(async (row) => {
+        const movieID = row.movie_id;
 
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieID}`,
+          {
+            params: {
+              api_key: apiKey,
+              language: "en-US",
+            },
+          }
+        );
+
+        const movie = response.data;
+
+        return {
+          id: movie.id,
+          title: movie.title,
+          overview: movie.overview || "No overview available.",
+          posterPath: movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : null,
+          releaseDate: movie.release_date || "Unknown",
+          rating: movie.vote_average ? movie.vote_average.toFixed(1) : "N/A",
+        };
+      })
+    );
+
+    // Render liked list
     res.render("pages/liked", {
-      movies: likedMovies,
-      username: req.session.username,
+      movies,
+      username,
     });
-
+  } catch (err) {
+    console.error("Error loading liked movies:", err);
+    res.render("pages/liked", {
+      movies: [],
+      username,
+      error: "Failed to load liked movies.",
+    });
   }
-  catch (err) {
-    console.error(`Error:`, err);
-  }
-})
+});
 
 // ---------- SWIPE FEATURE ----------
 
