@@ -20,8 +20,15 @@ const hbs = handlebars.create({
   partialsDir: __dirname + "/views/partials",
 });
 
-// database configuration
-const db = pgp(process.env.DATABASE_URL);
+const db = pgp(
+  process.env.DATABASE_URL || {
+    host: process.env.POSTGRES_HOST || "db",
+    port: 5432,
+    database: process.env.POSTGRES_DB,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+  }
+);
 
 // test your database
 db.connect()
