@@ -1,4 +1,7 @@
-<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f8f9fa;">
+<div
+  class="d-flex justify-content-center align-items-center min-vh-100 py-5"
+  style="background-color: #f8f9fa;"
+>
   <div class="card shadow-lg p-4" style="width: 400px; border-radius: 16px;">
     <div class="text-center mb-4">
       <h3 class="fw-bold">
@@ -10,7 +13,10 @@
     </div>
 
     {{#if message}}
-      <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center" role="alert">
+      <div
+        class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center"
+        role="alert"
+      >
         {{message}}
       </div>
     {{/if}}
@@ -46,10 +52,16 @@
 
       <div class="mb-3">
         <label for="password" class="form-label fw-semibold">Password</label>
-        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          required
+        >
       </div>
 
-      <!-- NEW FAVORITES SECTION -->
       <hr class="my-3">
       <h6 class="fw-bold mb-2">Customize Your Profile</h6>
 
@@ -79,18 +91,23 @@
           type="text"
           class="form-control"
           name="favorite_actress"
-          placeholder="e.g. Zendaya or Margot Robbie"
+          placeholder="e.g. Zendaya"
         >
       </div>
 
-      <button type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #000022;">
+      <button
+        type="submit"
+        class="btn w-100 text-white fw-semibold"
+        style="background-color: #000022;"
+      >
         Create Account
       </button>
     </form>
 
     <div class="text-center mt-3">
       <small class="text-muted">
-        Already have an account? <a href="/login" class="text-primary fw-semibold text-decoration-none">Sign in</a>
+        Already have an account?
+        <a href="/login" class="text-primary fw-semibold text-decoration-none">Sign in</a>
       </small>
     </div>
   </div>
