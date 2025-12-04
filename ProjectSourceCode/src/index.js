@@ -214,7 +214,18 @@ app.post("/login", async (req, res) => {
 
 app.get("/discover", auth, async (req, res) => {
   try {
-    // Fetch popular movies from TMDB
+    const username = req.session.username;
+    const page = parseInt(req.query.page) || 1; // Get page from query params, default to 1
+    
+    // Get movies user has already swiped on
+    const swipedMovies = await db.any(
+      `SELECT movie_id FROM swipes WHERE username = $1`,
+      [username]
+    );
+    
+    const swipedIds = swipedMovies.map(m => m.movie_id);
+    
+    // Fetch popular movies from TMDB with pagination
     const response = await axios.get(
       `https://api.themoviedb.org/3/discover/movie`,
       {
@@ -222,36 +233,46 @@ app.get("/discover", auth, async (req, res) => {
           api_key: process.env.TMDB_API_KEY,
           sort_by: "popularity.desc",
           language: "en-US",
-          page: 1,
+          page: page,
           include_adult: false,
         },
       }
     );
 
-    const movies = response.data.results.map((movie) => ({
-      id: movie.id,
-      title: movie.title,
-      overview: movie.overview,
-      posterPath: movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : null,
-      releaseDate: movie.release_date,
-      rating: movie.vote_average,
-    }));
+    // Filter out already swiped movies
+    const movies = response.data.results
+      .filter(movie => !swipedIds.includes(movie.id))
+      .map((movie) => ({
+        id: movie.id,
+        title: movie.title,
+        overview: movie.overview,
+        posterPath: movie.poster_path
+          ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+          : null,
+        releaseDate: movie.release_date,
+        rating: movie.vote_average.toFixed(1),
+      }));
 
     res.render("pages/discover", {
       movies,
       username: req.session.username,
+      currentPage: page,
+      totalPages: response.data.total_pages > 500 ? 500 : response.data.total_pages, // TMDB limits to 500 pages
+      hasNextPage: page < 500,
+      hasPrevPage: page > 1,
     });
   } catch (err) {
     console.error("Error fetching movies:", err.message);
     res.render("pages/discover", {
       movies: [],
       error: "Failed to load movies",
+      currentPage: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPrevPage: false,
     });
   }
 });
-
 // All routes below this line require authentication
 app.use(auth);
 
@@ -421,10 +442,19 @@ app.post("/movies/like/:id", async (req, res) => {
       [username, movieId]
     );
 
-    res.redirect("/swipe");
+    // Check if it's an AJAX request (from discover page) or form submission (from swipe page)
+    if (req.headers['content-type'] === 'application/json' || req.xhr) {
+      return res.json({ success: true });
+    } else {
+      return res.redirect("/swipe");
+    }
   } catch (err) {
     console.error("Error saving like swipe:", err.message, err);
-    res.status(500).send("Failed to save swipe");
+    if (req.headers['content-type'] === 'application/json' || req.xhr) {
+      return res.status(500).json({ success: false, error: "Failed to save swipe" });
+    } else {
+      return res.status(500).send("Failed to save swipe");
+    }
   }
 });
 
@@ -443,10 +473,19 @@ app.post("/movies/dislike/:id", async (req, res) => {
       [username, movieId]
     );
 
-    res.redirect("/swipe");
+    // Check if it's an AJAX request or form submission
+    if (req.headers['content-type'] === 'application/json' || req.xhr) {
+      return res.json({ success: true });
+    } else {
+      return res.redirect("/swipe");
+    }
   } catch (err) {
     console.error("Error saving dislike swipe:", err.message, err);
-    res.status(500).send("Failed to save swipe");
+    if (req.headers['content-type'] === 'application/json' || req.xhr) {
+      return res.status(500).json({ success: false, error: "Failed to save swipe" });
+    } else {
+      return res.status(500).send("Failed to save swipe");
+    }
   }
 });
 
