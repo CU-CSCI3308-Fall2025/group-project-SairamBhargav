@@ -1,129 +1,27 @@
-<div
-  class="d-flex justify-content-center align-items-center min-vh-100 py-5"
-  style="background-color: #f8f9fa;"
->
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f8f9fa;">
   <div class="card shadow-lg p-4" style="width: 400px; border-radius: 16px;">
     <div class="text-center mb-4">
-      <h3 class="fw-bold">
-        🎬 MatchFlix
-      </h3>
-      <p class="text-muted mb-0">
-        Create an account to discover movies you love
-      </p>
-    </div>
-
-    {{#if message}}
-      <div
-        class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center"
-        role="alert"
-      >
-        {{message}}
-      </div>
-    {{/if}}
-
-    <form action="/register" method="POST">
-      <div class="mb-3">
-        <label for="firstName" class="form-label">First Name</label>
-        <input type="text" class="form-control" name="firstName" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="lastName" class="form-label">Last Name</label>
-        <input type="text" class="form-control" name="lastName" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" name="email" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="dateOfBirth" class="form-label">Date of Birth</label>
-        <input type="date" class="form-control" name="dateOfBirth" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="username" class="form-label fw-semibold">Username</label>
-        <input type="text" class="form-control" id="username" name="username" required>
-      </div>
-
-      <!-- AI Username Suggestions -->
+      <h3 class="fw-bold"> 🎬 MatchFlix </h3>
+      <p class="text-muted mb-0"> Create an account to discover movies you love </p>
+    </div> {{#if message}} <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center"
+      role="alert"> {{message}} </div> {{/if}} <form action="/register" method="POST">
+      <div class="mb-3"> <label for="firstName" class="form-label">First Name</label> <input type="text"
+          class="form-control" name="firstName" required> </div>
+      <div class="mb-3"> <label for="lastName" class="form-label">Last Name</label> <input type="text"
+          class="form-control" name="lastName" required> </div>
+      <div class="mb-3"> <label for="email" class="form-label">Email</label> <input type="email" class="form-control"
+          name="email" required> </div>
+      <div class="mb-3"> <label for="dateOfBirth" class="form-label">Date of Birth</label> <input type="date"
+          class="form-control" name="dateOfBirth" required> </div>
+      <div class="mb-3"> <label for="username" class="form-label fw-semibold">Username</label> <input type="text"
+          class="form-control" id="username" name="username" required> </div> <!-- AI Suggestions -->
       <div id="username-suggestions" class="suggestion-box"></div>
-
-      <div class="mb-3">
-        <label for="password" class="form-label fw-semibold">Password</label>
-        <input
-          type="password"
-          class="form-control"
-          id="password"
-          name="password"
-          placeholder="••••••••"
-          required
-        >
-      </div>
-
-      <hr class="my-3">
-      <h6 class="fw-bold mb-2">Customize Your Profile</h6>
-
-      <div class="mb-3">
-  <label for="favorite_genre" class="form-label">Favorite Genre</label>
-  <select class="form-select" name="favorite_genre" required>
-    <option value="">Select a Genre</option>
-    <option>Action</option>
-    <option>Adventure</option>
-    <option>Animation</option>
-    <option>Comedy</option>
-    <option>Crime</option>
-    <option>Documentary</option>
-    <option>Drama</option>
-    <option>Family</option>
-    <option>Fantasy</option>
-    <option>History</option>
-    <option>Horror</option>
-    <option>Music</option>
-    <option>Mystery</option>
-    <option>Romance</option>
-    <option>Sci-Fi</option>
-    <option>Thriller</option>
-    <option>War</option>
-    <option>Western</option>
-  </select>
-</div>
-
-      <div class="mb-3">
-        <label for="favorite_actor" class="form-label">Favorite Actor</label>
-        <input
-          type="text"
-          class="form-control"
-          name="favorite_actor"
-          placeholder="e.g. Leonardo DiCaprio"
-        >
-      </div>
-
-      <div class="mb-4">
-        <label for="favorite_actress" class="form-label">Favorite Actress</label>
-        <input
-          type="text"
-          class="form-control"
-          name="favorite_actress"
-          placeholder="e.g. Zendaya"
-        >
-      </div>
-
-      <button
-        type="submit"
-        class="btn w-100 text-white fw-semibold"
-        style="background-color: #000022;"
-      >
-        Create Account
-      </button>
+      <div class="mb-3"> <label for="password" class="form-label fw-semibold">Password</label> <input type="password"
+          class="form-control" id="password" name="password" placeholder="••••••••" required> </div> <button
+        type="submit" class="btn w-100 text-white fw-semibold" style="background-color: #000022;">Create
+        Account</button>
     </form>
-
-    <div class="text-center mt-3">
-      <small class="text-muted">
-        Already have an account?
-        <a href="/login" class="text-primary fw-semibold text-decoration-none">Sign in</a>
-      </small>
-    </div>
+    <div class="text-center mt-3"> <small class="text-muted"> Already have an account? <a href="/login"
+          class="text-primary fw-semibold text-decoration-none">Sign in</a> </small> </div>
   </div>
 </div>
