@@ -1,7 +1,3 @@
-// *****************************************************
-// <!-- Section 1 : Import Dependencies -->
-// *****************************************************
-
 const express = require("express"); // To build an application server or API
 const app = express();
 const handlebars = require("express-handlebars");
@@ -11,7 +7,7 @@ const pgp = require("pg-promise")(); // To connect to the Postgres DB from the n
 const bodyParser = require("body-parser");
 const session = require("express-session"); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const bcrypt = require("bcryptjs"); //  To hash passwords
-const axios = require("axios"); // To make HTTP requests from our server. We'll learn more about it in Part C.
+const axios = require("axios"); // To make HTTP requests from our server.
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -53,19 +49,19 @@ db.connect()
 app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
+
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     saveUninitialized: false,
     resave: false,
-  })
-);
-
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
   })
 );
 
@@ -80,41 +76,45 @@ const auth = (req, res, next) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 // *****************************************************
-// <!-- Section 4 : API Routes -->
+// <!-- Section 4 : Routes -->
 // *****************************************************
 
-// TODO - Include your API routes here
-//this is so to direct the user to the login page or discovery page depending on whether they are logged in
+// Simple test route
 app.get("/welcome", (req, res) => {
   res.json({ status: "success", message: "Welcome!" });
 });
 
+// Root redirect – use username, not user
 app.get("/", (req, res) => {
-  if (req.session.user) {
+  if (req.session.username) {
     res.redirect("/discover");
   } else {
     res.redirect("/login");
   }
 });
-//register page
+
+// ---------- AUTH / LOGIN / REGISTER ----------
+
+// Register page
 app.get("/register", (req, res) => {
   res.render("pages/register", { title: "Register" });
 });
+
 app.post("/register", async (req, res) => {
   const { username, password, firstName, lastName, email, dateOfBirth } =
     req.body;
 
   try {
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Minimum password length, must be 8 characters mimimum
+    // Minimum password length: 8
     if (password.length < 8) {
       return res.render("pages/register", {
         message: "Registration failed. Password must be at least 8 characters.",
         error: true,
       });
     }
+
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // insert user into database
     await db.none(
@@ -123,10 +123,8 @@ app.post("/register", async (req, res) => {
       [username, hashedPassword, firstName, lastName, email, dateOfBirth]
     );
 
-    res.render("pages/register", {
-      message: "User registered successfully!",
-      success: true,
-    });
+   return res.redirect("/login");
+   
   } catch (err) {
     console.error(err);
     res.render("pages/register", {
@@ -136,7 +134,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-//login
+// Login page
 app.get("/login", (req, res) => {
   res.render("pages/login");
 });
@@ -174,7 +172,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Discover page - shows movies from TMDB
+// ---------- DISCOVER (public routes above auth) ----------
+
 app.get("/discover", auth, async (req, res) => {
   try {
     // Fetch popular movies from TMDB
@@ -203,7 +202,7 @@ app.get("/discover", auth, async (req, res) => {
     }));
 
     res.render("pages/discover", {
-      movies: movies,
+      movies,
       username: req.session.username,
     });
   } catch (err) {
@@ -214,73 +213,37 @@ app.get("/discover", auth, async (req, res) => {
     });
   }
 });
-// Authentication Required
+
+// All routes below this line require authentication
 app.use(auth);
 
-// --- PROFILE ROUTE ---
-app.get("/profile", async (req, res) => {
-  const username = req.session.username; // or however you store the logged-in user
+// ---------- PROFILE (uses swipes table) ----------
 
-  if (!username) {
-    // Not logged in
-    return res.redirect("/login");
-  }
+app.get("/profile", async (req, res) => {
+  const username = req.session.username;
 
   try {
-    // --- Get total liked movies ---
-    const totalLiked = await db.query(
-      "SELECT COUNT(*) FROM liked_movies WHERE username = $1",
-      [username]
-    );
-
-    // --- Get most liked genre ---
-    const topGenre = await db.query(
+    // Count liked swipes for this user
+    const { count } = await db.one(
       `
-      SELECT genre FROM liked_movies
-      WHERE username = $1
-      GROUP BY genre
-      ORDER BY COUNT(*) DESC
-      LIMIT 1
-    `,
+      SELECT COUNT(*) AS count
+      FROM swipes
+      WHERE username = $1 AND action = 'like'
+      `,
       [username]
     );
 
-    // --- Get most liked actor ---
-    const topActor = await db.query(
-      `
-      SELECT actor FROM liked_movies
-      WHERE username = $1
-      GROUP BY actor
-      ORDER BY COUNT(*) DESC
-      LIMIT 1
-    `,
-      [username]
-    );
-
-    // --- Get most liked actress ---
-    const topActress = await db.query(
-      `
-      SELECT actress FROM liked_movies
-      WHERE username = $1
-      GROUP BY actress
-      ORDER BY COUNT(*) DESC
-      LIMIT 1
-    `,
-      [username]
-    );
-
-    // --- Render the profile page ---
     res.render("pages/profile", {
       user: { username },
       stats: {
-        totalLiked: totalLiked.rows[0]?.count || 0,
-        topGenre: topGenre.rows[0]?.genre || "N/A",
-        topActor: topActor.rows[0]?.actor || "N/A",
-        topActress: topActress.rows[0]?.actress || "N/A",
+        totalLiked: Number(count),
+        topGenre: "N/A", // not stored in swipes table
+        topActor: "N/A",
+        topActress: "N/A",
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error loading profile:", err);
     res.render("pages/profile", {
       user: { username },
       stats: {
@@ -327,46 +290,51 @@ app.get('/liked', async (req,res) => {
         likedMoviesAPI.push(null);
       }
 
-    }
+        const movie = response.data;
 
-    const likedMovies = likedMoviesAPI.map((movie) => ({
-      id: movie.id,
-      title: movie.title,
-      overview: movie.overview,
-      posterPath: movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : null,
-      releaseDate: movie.release_date,
-      rating: movie.vote_average,
-    }));
+        return {
+          id: movie.id,
+          title: movie.title,
+          overview: movie.overview || "No overview available.",
+          posterPath: movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : null,
+          releaseDate: movie.release_date || "Unknown",
+          rating: movie.vote_average ? movie.vote_average.toFixed(1) : "N/A",
+        };
+      })
+    );
 
     res.render("pages/liked", {
       movies: likedMovies,
       username: req.session.username,
     });
+  } catch (err) {
+    console.error("Error loading liked movies:", err);
+    res.render("pages/liked", {
+      movies: [],
+      username: req.session.username,
+      error: "Failed to load liked movies.",
+    });
+  }
+});
 
-  }
-  catch (err) {
-    console.error(`Error:`, err);
-  }
-})
-// Swipe feature route
+// ---------- SWIPE FEATURE ----------
+
 app.get("/swipe", async (req, res) => {
   try {
-    // Fetch a random movie from TMDB
+    // Fetch a random page and random movie
     const randomPage = Math.floor(Math.random() * 500) + 1;
 
     const response = await fetch(
-      `https://api.themoviedb.org/3/movie/popular?api_key=98d9665b319075a5eaf64410976293ab&page=${randomPage}`
+      `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY}&page=${randomPage}`
     );
 
     const data = await response.json();
 
-    // Pick a random movie from the results
     const randomIndex = Math.floor(Math.random() * data.results.length);
     const movieData = data.results[randomIndex];
 
-    // Format the movie data
     const movie = {
       id: movieData.id,
       title: movieData.title,
@@ -380,24 +348,23 @@ app.get("/swipe", async (req, res) => {
       releaseDate: movieData.release_date || "Unknown",
     };
 
-    // Render the swipe template with the movie data
     res.render("pages/swipe", {
-      username: req.session.username || req.user?.username,
-      movie: movie,
+      username: req.session.username,
+      movie,
     });
   } catch (error) {
     console.error("Error fetching random movie:", error);
     res.render("pages/swipe", {
-      username: req.session.username || req.user?.username,
+      username: req.session.username,
       error: "Failed to load movie. Please try again.",
       movie: null,
     });
   }
 });
 
-app.post("/movies/like/:id", auth, async (req, res) => {
+app.post("/movies/like/:id", async (req, res) => {
   const username = req.session.username;
-  const movieId = parseInt(req.params.id, 10); // make sure it's an integer
+  const movieId = parseInt(req.params.id, 10);
 
   try {
     await db.none(
@@ -417,7 +384,7 @@ app.post("/movies/like/:id", auth, async (req, res) => {
   }
 });
 
-app.post("/movies/dislike/:id", auth, async (req, res) => {
+app.post("/movies/dislike/:id", async (req, res) => {
   const username = req.session.username;
   const movieId = parseInt(req.params.id, 10);
 
@@ -439,12 +406,13 @@ app.post("/movies/dislike/:id", auth, async (req, res) => {
   }
 });
 
+// ---------- GEMINI RECOMMENDATIONS (uses swipes) ----------
+
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-// movie recommendation:
-app.post("/api/recommendations/generate", auth, async (req, res) => {
+app.post("/api/recommendations/generate", async (req, res) => {
   const username = req.session.username;
 
   try {
@@ -513,16 +481,12 @@ app.post("/api/recommendations/generate", auth, async (req, res) => {
     }
 
     // 4. Extract JSON from the text
-
-    // Default: assume the whole text is JSON
     let jsonStr = text.trim();
 
-    // Case 1: wrapped in ```json ... ``` or ``` ... ```
     const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
     if (codeBlockMatch && codeBlockMatch[1]) {
       jsonStr = codeBlockMatch[1].trim();
     } else {
-      // Case 2: find first {...} block
       const braceMatch = text.match(/\{[\s\S]*\}/);
       if (braceMatch) {
         jsonStr = braceMatch[0].trim();
@@ -551,7 +515,6 @@ app.post("/api/recommendations/generate", auth, async (req, res) => {
 
     console.log("[Reco] recommendedIds =", recommendedIds);
 
-    // 5. Fetch TMDB details for recommended movies
     const recommendedMovies = await Promise.all(
       recommendedIds.map(async (id) => {
         const details = await axios.get(
@@ -562,7 +525,6 @@ app.post("/api/recommendations/generate", auth, async (req, res) => {
       })
     );
 
-    // 6. Success
     res.json({
       status: "success",
       recommendations: recommendedMovies,
@@ -573,9 +535,22 @@ app.post("/api/recommendations/generate", auth, async (req, res) => {
   }
 });
 
+// ---------- LOGOUT ----------
+
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.redirect("/discover");
+    }
+
+    res.clearCookie("connect.sid");
+    return res.redirect("/login");
+  });
+});
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
-// starting the server and keeping the connection open to listen for more requests
 module.exports = app.listen(3000);
 console.log("Server is listening on port 3000");
