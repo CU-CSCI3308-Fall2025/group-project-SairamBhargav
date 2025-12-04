@@ -19,10 +19,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     dateOfBirth DATE
 
-      -- NEW: user favorites for profile
-    favorite_genre   VARCHAR(100),
-    favorite_actor   VARCHAR(100),
-    favorite_actress VARCHAR(100)
+   
 );
 
 -- User profiles (FIXED: references username now)
