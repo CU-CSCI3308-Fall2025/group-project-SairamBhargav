@@ -177,6 +177,36 @@
         display: flex;
     }
 
+    .reco-loading {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1100;
+    }
+
+    .reco-loading.show {
+        display: flex;
+    }
+
+    .reco-loading-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+    }
+
+    .reco-loading-content {
+        position: relative;
+        background: rgba(0, 0, 0, 0.85);
+        color: #ffffff;
+        padding: 22px 26px;
+        border-radius: 14px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.35);
+        min-width: 240px;
+    }
+
     .reco-backdrop {
         position: absolute;
         inset: 0;
@@ -352,6 +382,16 @@
 
 </div>
 
+<div id="reco-loading" class="reco-loading">
+    <div class="reco-loading-backdrop"></div>
+    <div class="reco-loading-content">
+        <div class="spinner-border text-light mb-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="fw-semibold">Building your recommendations...</div>
+    </div>
+</div>
+
 <div id="reco-modal" class="reco-modal">
     <div class="reco-backdrop"></div>
     <div class="reco-content">
@@ -389,6 +429,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         const usernameInput = document.getElementById("username-hidden");
         const modal = document.getElementById("reco-modal");
+        const loader = document.getElementById("reco-loading");
         const closeBtn = document.getElementById("reco-close");
         const recoList = document.getElementById("reco-list");
 
@@ -405,6 +446,7 @@
         localStorage.setItem(key, String(count));
 
         if (count % 10 === 0) {
+            if (loader) loader.classList.add("show");
             fetch("/api/recommendations/generate", {
                 method: "POST"
             })
@@ -458,12 +500,16 @@
 
                     modal.classList.add("show");
                 })
-                .catch(() => {});
+                .catch(() => { })
+                .finally(() => {
+                    if (loader) loader.classList.remove("show");
+                });
         }
 
         if (closeBtn) {
             closeBtn.addEventListener("click", () => {
                 modal.classList.remove("show");
+                if (loader) loader.classList.remove("show");
             });
         }
 
@@ -471,6 +517,7 @@
         if (backdrop) {
             backdrop.addEventListener("click", () => {
                 modal.classList.remove("show");
+                if (loader) loader.classList.remove("show");
             });
         }
     });

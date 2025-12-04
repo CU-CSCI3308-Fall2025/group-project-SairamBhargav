@@ -12,7 +12,7 @@ const axios = require("axios"); // To make HTTP requests from our server.
 // --- OpenAI (for username recommendations) ---
 const OpenAI = require("openai");
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 app.post("/suggest-username", async (req, res) => {
@@ -30,16 +30,13 @@ app.post("/suggest-username", async (req, res) => {
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.7
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
     });
 
     const suggestions = JSON.parse(response.choices[0].message.content);
 
     res.json({ suggestions });
-
   } catch (err) {
     console.error("Username suggestion error:", err);
     res.json({
@@ -47,7 +44,7 @@ app.post("/suggest-username", async (req, res) => {
         `${firstName}${lastName}${birthYear}`,
         `${firstName}_${birthYear}`,
         `${firstName.charAt(0)}${lastName}${birthYear}`,
-      ]
+      ],
     });
   }
 });
@@ -519,16 +516,15 @@ app.post("/api/recommendations/generate", async (req, res) => {
     );
 
     const prompt = `
-      You are a movie recommendation engine.
+      You are a TMDB movie recommendation engine.
       Analyze this list of movies the user liked:
       ${JSON.stringify(likedMoviesDetailed)}
 
-      Recommend 10 movies the user would enjoy.
-      Only return JSON in this exact format, with nothing else:
-
-      {
-        "recommended": [123, 456, 789]
-      }
+      Return exactly 10 TMDB MOVIE (not TV) IDs that currently exist and are not deleted/404.
+      IDs must work with TMDB v3 /movie/{id} as of ${new Date().getFullYear()}.
+      Do NOT include TV, de-listed titles, or placeholders.
+      Only return JSON in this exact shape, no code fences, no extra text:
+      { "recommended": [123, 456, 789] }
     `;
 
     // 3. call Gemini
@@ -570,7 +566,9 @@ app.post("/api/recommendations/generate", async (req, res) => {
       });
     }
 
-    const recommendedIds = parsed.recommended;
+    const recommendedIds = Array.isArray(parsed.recommended)
+      ? [...new Set(parsed.recommended)].filter((n) => Number.isInteger(n) && n > 0)
+      : [];
 
     if (!Array.isArray(recommendedIds) || recommendedIds.length === 0) {
       console.error("[Reco] recommendedIds invalid:", recommendedIds);
@@ -622,10 +620,10 @@ app.post("/api/recommendations/generate", async (req, res) => {
     }
 
     // 6. Fallback: if we have no usable movies, send random popular ones
-    if (recommendedMovies.length === 0) {
+    if (recommendedMovies.length < 5) {
       try {
         console.warn(
-          "[Reco] no valid recommended IDs, using fallback popular movies"
+          "[Reco] insufficient valid recommended IDs, using fallback popular movies"
         );
         recommendedMovies = await getRandomFallbackRecommendations(10);
       } catch (fallbackErr) {
