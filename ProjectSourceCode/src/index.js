@@ -297,12 +297,13 @@ app.get("/profile", async (req, res) => {
 
 app.get('/liked', async (req,res) => {
 
-  const username = session.username;
+  const username = req.session.username;
   const query = `
     SELECT movie_id
-    FROM liked_movies
-    WHERE username = $1
+    FROM swipes
+    WHERE username = $1 AND action = 'like'
   `
+  const apiKey = process.env.TMDB_API_KEY;
   try{
 
     const likedMoviesIDs = await db.any(query, [username]);
@@ -310,24 +311,19 @@ app.get('/liked', async (req,res) => {
     const likedMoviesAPI = [];
 
     for (const row of likedMoviesIDs) {
-      const imdbId = row.movie_id;
+      const movieID = row.movie_id;
 
-      const url = `https://api.themoviedb.org/3/find/${imdbId}?external_source=imdb_id&language=en-US&api_key=${apiKey}`;
-
+      const url = `https://api.themoviedb.org/3/movie/${movieID}?api_key=${apiKey}&language=en-US`;
+ 
       try {
-        // Step 3: Fetch TMDB data
+
         const res = await fetch(url);
         const data = await res.json();
 
-        // Step 4: Push movie info (TMDB returns an array)
-        if (data.movie_results && ddata.movie_results.length > 0) {
-          likedMoviesAPI.push(data.movie_results[0]); 
-        } else {
-          likedMoviesAPI.push(null);  // or skip it
-        }
+        likedMoviesAPI.push(data);
 
       } catch (err) {
-        console.error(`Error fetching ${imdbId}:`, err);
+        console.error(`Error fetching ${movieID}:`, err);
         likedMoviesAPI.push(null);
       }
 
@@ -344,7 +340,6 @@ app.get('/liked', async (req,res) => {
       rating: movie.vote_average,
     }));
 
-    console.log(likedMovies);
     res.render("pages/liked", {
       movies: likedMovies,
       username: req.session.username,
