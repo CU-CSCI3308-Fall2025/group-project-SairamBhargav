@@ -1,7 +1,3 @@
-// *****************************************************
-// <!-- Section 1 : Import Dependencies -->
-// *****************************************************
-
 const express = require("express"); // To build an application server or API
 const app = express();
 const handlebars = require("express-handlebars");
@@ -83,31 +79,30 @@ app.use(express.static(path.join(__dirname, "public")));
 // <!-- Section 4 : API Routes -->
 // *****************************************************
 
-// TODO - Include your API routes here
-//this is so to direct the user to the login page or discovery page depending on whether they are logged in
+// Simple welcome test
 app.get("/welcome", (req, res) => {
   res.json({ status: "success", message: "Welcome!" });
 });
 
+// Root redirect – FIXED to use username
 app.get("/", (req, res) => {
-  if (req.session.user) {
+  if (req.session.username) {
     res.redirect("/discover");
   } else {
     res.redirect("/login");
   }
 });
-//register page
+
+// Register page
 app.get("/register", (req, res) => {
   res.render("pages/register", { title: "Register" });
 });
+
 app.post("/register", async (req, res) => {
   const { username, password, firstName, lastName, email, dateOfBirth } =
     req.body;
 
   try {
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     // Minimum password length, must be 8 characters mimimum
     if (password.length < 8) {
       return res.render("pages/register", {
@@ -115,6 +110,9 @@ app.post("/register", async (req, res) => {
         error: true,
       });
     }
+
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // insert user into database
     await db.none(
@@ -136,7 +134,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-//login
+// Login page
 app.get("/login", (req, res) => {
   res.render("pages/login");
 });
@@ -214,73 +212,76 @@ app.get("/discover", auth, async (req, res) => {
     });
   }
 });
-// Authentication Required
+
+// Authentication Required for all routes below this line
 app.use(auth);
 
 // --- PROFILE ROUTE ---
+// Pulls stats from the `swipes` table where action = 'like'
 app.get("/profile", async (req, res) => {
-  const username = req.session.username; // or however you store the logged-in user
-
-  if (!username) {
-    // Not logged in
-    return res.redirect("/login");
-  }
+  const username = req.session.username;
 
   try {
-    // --- Get total liked movies ---
-    const totalLiked = await db.query(
-      "SELECT COUNT(*) FROM liked_movies WHERE username = $1",
+    // 1. Total liked movies
+    const totalLikedRow = await db.one(
+      `
+      SELECT COUNT(*) AS count
+      FROM swipes
+      WHERE username = $1 AND action = 'like'
+      `,
       [username]
     );
 
-    // --- Get most liked genre ---
-    const topGenre = await db.query(
+    // 2. Most liked genre
+    const topGenreRow = await db.oneOrNone(
       `
-      SELECT genre FROM liked_movies
-      WHERE username = $1
+      SELECT genre, COUNT(*) AS c
+      FROM swipes
+      WHERE username = $1 AND action = 'like' AND genre IS NOT NULL
       GROUP BY genre
-      ORDER BY COUNT(*) DESC
+      ORDER BY c DESC
       LIMIT 1
-    `,
+      `,
       [username]
     );
 
-    // --- Get most liked actor ---
-    const topActor = await db.query(
+    // 3. Most liked actor
+    const topActorRow = await db.oneOrNone(
       `
-      SELECT actor FROM liked_movies
-      WHERE username = $1
+      SELECT actor, COUNT(*) AS c
+      FROM swipes
+      WHERE username = $1 AND action = 'like' AND actor IS NOT NULL
       GROUP BY actor
-      ORDER BY COUNT(*) DESC
+      ORDER BY c DESC
       LIMIT 1
-    `,
+      `,
       [username]
     );
 
-    // --- Get most liked actress ---
-    const topActress = await db.query(
+    // 4. Most liked actress
+    const topActressRow = await db.oneOrNone(
       `
-      SELECT actress FROM liked_movies
-      WHERE username = $1
+      SELECT actress, COUNT(*) AS c
+      FROM swipes
+      WHERE username = $1 AND action = 'like' AND actress IS NOT NULL
       GROUP BY actress
-      ORDER BY COUNT(*) DESC
+      ORDER BY c DESC
       LIMIT 1
-    `,
+      `,
       [username]
     );
 
-    // --- Render the profile page ---
     res.render("pages/profile", {
       user: { username },
       stats: {
-        totalLiked: totalLiked.rows[0]?.count || 0,
-        topGenre: topGenre.rows[0]?.genre || "N/A",
-        topActor: topActor.rows[0]?.actor || "N/A",
-        topActress: topActress.rows[0]?.actress || "N/A",
+        totalLiked: totalLikedRow.count || 0,
+        topGenre: topGenreRow?.genre || "N/A",
+        topActor: topActorRow?.actor || "N/A",
+        topActress: topActressRow?.actress || "N/A",
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error loading profile:", err);
     res.render("pages/profile", {
       user: { username },
       stats: {
@@ -295,66 +296,60 @@ app.get("/profile", async (req, res) => {
   }
 });
 
-app.get('/liked', async (req,res) => {
+// --- LIKED MOVIES PAGE ---
+// Uses `swipes` table (action='like') and TMDB to show liked movie details
+app.get("/liked", async (req, res) => {
+  const username = req.session.username;
 
-  const username = session.username;
-  const query = `
-    SELECT movie_id
-    FROM liked_movies
-    WHERE username = $1
-  `
-  try{
+  try {
+    // Get all liked movie IDs from swipes
+    const likedMoviesIDs = await db.any(
+      `
+      SELECT movie_id
+      FROM swipes
+      WHERE username = $1 AND action = 'like'
+      `,
+      [username]
+    );
 
-    const likedMoviesIDs = await db.any(query, [username]);
+    const likedMovies = await Promise.all(
+      likedMoviesIDs.map(async (row) => {
+        const tmdbId = row.movie_id;
 
-    const likedMoviesAPI = [];
+        const response = await axios.get(
+          `https://api.themoviedb.org/3/movie/${tmdbId}`,
+          { params: { api_key: process.env.TMDB_API_KEY } }
+        );
 
-    for (const row of likedMoviesIDs) {
-      const imdbId = row.movie_id;
+        const movie = response.data;
 
-      const url = `https://api.themoviedb.org/3/find/${imdbId}?external_source=imdb_id&language=en-US&api_key=${apiKey}`;
+        return {
+          id: movie.id,
+          title: movie.title,
+          overview: movie.overview || "No overview available.",
+          posterPath: movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : null,
+          releaseDate: movie.release_date || "Unknown",
+          rating: movie.vote_average ? movie.vote_average.toFixed(1) : "N/A",
+        };
+      })
+    );
 
-      try {
-        // Step 3: Fetch TMDB data
-        const res = await fetch(url);
-        const data = await res.json();
-
-        // Step 4: Push movie info (TMDB returns an array)
-        if (data.movie_results && ddata.movie_results.length > 0) {
-          likedMoviesAPI.push(data.movie_results[0]); 
-        } else {
-          likedMoviesAPI.push(null);  // or skip it
-        }
-
-      } catch (err) {
-        console.error(`Error fetching ${imdbId}:`, err);
-        likedMoviesAPI.push(null);
-      }
-
-    }
-
-    const likedMovies = likedMoviesAPI.map((movie) => ({
-      id: movie.id,
-      title: movie.title,
-      overview: movie.overview,
-      posterPath: movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : null,
-      releaseDate: movie.release_date,
-      rating: movie.vote_average,
-    }));
-
-    console.log(likedMovies);
     res.render("pages/liked", {
       movies: likedMovies,
       username: req.session.username,
     });
+  } catch (err) {
+    console.error("Error loading liked movies:", err);
+    res.render("pages/liked", {
+      movies: [],
+      username: req.session.username,
+      error: "Failed to load liked movies.",
+    });
+  }
+});
 
-  }
-  catch (err) {
-    console.error(`Error:`, err);
-  }
-})
 // Swipe feature route
 app.get("/swipe", async (req, res) => {
   try {
@@ -400,7 +395,7 @@ app.get("/swipe", async (req, res) => {
   }
 });
 
-app.post("/movies/like/:id", auth, async (req, res) => {
+app.post("/movies/like/:id", async (req, res) => {
   const username = req.session.username;
   const movieId = parseInt(req.params.id, 10); // make sure it's an integer
 
@@ -422,7 +417,7 @@ app.post("/movies/like/:id", auth, async (req, res) => {
   }
 });
 
-app.post("/movies/dislike/:id", auth, async (req, res) => {
+app.post("/movies/dislike/:id", async (req, res) => {
   const username = req.session.username;
   const movieId = parseInt(req.params.id, 10);
 
@@ -449,7 +444,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // movie recommendation:
-app.post("/api/recommendations/generate", auth, async (req, res) => {
+app.post("/api/recommendations/generate", async (req, res) => {
   const username = req.session.username;
 
   try {
@@ -576,6 +571,24 @@ app.post("/api/recommendations/generate", auth, async (req, res) => {
     console.error("Error generating recommendations:", err);
     res.status(500).json({ error: "Failed to generate recommendations." });
   }
+});
+
+// -----------------------------------------------------
+// LOGOUT ROUTE
+// -----------------------------------------------------
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.redirect("/discover"); // fallback if something breaks
+    }
+
+    // Clear session cookie (default connect.sid)
+    res.clearCookie("connect.sid");
+
+    // Redirect user to login page
+    return res.redirect("/login");
+  });
 });
 
 // *****************************************************
