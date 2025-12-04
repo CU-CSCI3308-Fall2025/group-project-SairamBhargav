@@ -123,10 +123,8 @@ app.post("/register", async (req, res) => {
       [username, hashedPassword, firstName, lastName, email, dateOfBirth]
     );
 
-    res.render("pages/register", {
-      message: "User registered successfully!",
-      success: true,
-    });
+   return res.redirect("/login");
+   
   } catch (err) {
     console.error(err);
     res.render("pages/register", {
