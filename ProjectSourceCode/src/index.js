@@ -123,8 +123,7 @@ app.post("/register", async (req, res) => {
       [username, hashedPassword, firstName, lastName, email, dateOfBirth]
     );
 
-   return res.redirect("/login");
-   
+    return res.redirect("/login");
   } catch (err) {
     console.error(err);
     res.render("pages/register", {
@@ -417,6 +416,24 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+// Helper: random popular movies fallback if Gemini IDs fail
+async function getRandomFallbackRecommendations(count = 10) {
+  const randomPage = Math.floor(Math.random() * 50) + 1; // pages 1–50
+
+  const resp = await axios.get("https://api.themoviedb.org/3/discover/movie", {
+    params: {
+      api_key: process.env.TMDB_API_KEY,
+      sort_by: "popularity.desc",
+      language: "en-US",
+      page: randomPage,
+      include_adult: false,
+    },
+  });
+
+  // Return a limited list that matches what your UI expects
+  return resp.data.results.slice(0, count);
+}
+
 app.post("/api/recommendations/generate", async (req, res) => {
   const username = req.session.username;
 
@@ -492,7 +509,8 @@ app.post("/api/recommendations/generate", async (req, res) => {
     if (codeBlockMatch && codeBlockMatch[1]) {
       jsonStr = codeBlockMatch[1].trim();
     } else {
-      const braceMatch = text.match(/\{[\s\S]*\}/);
+      // fall back to first {...} block
+      const braceMatch = text.match(/\{[\s\S]*?\}/);
       if (braceMatch) {
         jsonStr = braceMatch[0].trim();
       }
@@ -513,24 +531,69 @@ app.post("/api/recommendations/generate", async (req, res) => {
 
     if (!Array.isArray(recommendedIds) || recommendedIds.length === 0) {
       console.error("[Reco] recommendedIds invalid:", recommendedIds);
-      return res.status(500).json({
-        error: "Recommendation model did not return any movie IDs.",
-      });
+      // we'll try fallback later
+    } else {
+      console.log("[Reco] recommendedIds =", recommendedIds);
     }
 
-    console.log("[Reco] recommendedIds =", recommendedIds);
+    // 5. Fetch TMDB details for each recommended ID,
+    //    but don't blow up on 404s; then fallback if empty.
+    let recommendedMovies = [];
 
-    const recommendedMovies = await Promise.all(
-      recommendedIds.map(async (id) => {
-        const details = await axios.get(
-          `https://api.themoviedb.org/3/movie/${id}`,
-          { params: { api_key: process.env.TMDB_API_KEY } }
+    if (Array.isArray(recommendedIds) && recommendedIds.length > 0) {
+      try {
+        const results = await Promise.allSettled(
+          recommendedIds.map((id) =>
+            axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
+              params: { api_key: process.env.TMDB_API_KEY },
+            })
+          )
         );
-        return details.data;
-      })
-    );
 
-    res.json({
+        recommendedMovies = results
+          .filter((r, idx) => {
+            if (r.status === "fulfilled") return true;
+
+            const id = recommendedIds[idx];
+            const status = r.reason?.response?.status;
+
+            if (status === 404) {
+              console.warn(`[Reco] TMDB movie ${id} not found (404), skipping`);
+              return false;
+            }
+
+            console.error(
+              `[Reco] TMDB error for movie ${id}:`,
+              status || r.reason?.message || r.reason
+            );
+            return false;
+          })
+          .map((r) => r.value.data);
+      } catch (err) {
+        console.error(
+          "[Reco] error fetching TMDB details, will try fallback:",
+          err
+        );
+        recommendedMovies = [];
+      }
+    }
+
+    // 6. Fallback: if we have no usable movies, send random popular ones
+    if (recommendedMovies.length === 0) {
+      try {
+        console.warn(
+          "[Reco] no valid recommended IDs, using fallback popular movies"
+        );
+        recommendedMovies = await getRandomFallbackRecommendations(10);
+      } catch (fallbackErr) {
+        console.error("[Reco] fallback recommendations failed:", fallbackErr);
+        return res
+          .status(500)
+          .json({ error: "Failed to generate recommendations." });
+      }
+    }
+
+    return res.json({
       status: "success",
       recommendations: recommendedMovies,
     });
