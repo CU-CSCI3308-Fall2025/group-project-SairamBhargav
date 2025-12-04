@@ -1,55 +1,129 @@
-{{> navbar }}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Dynamic title showing the logged-in user's username -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{user.username}}'s Profile</title>
-    <!-- Include Bootstrap CSS for responsive and styled components -->
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
 </head>
 
 <body style="background-color: #f8f9fa;">
+
+  {{> navbar }}
+
   <div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow-lg p-4 text-center" style="width: 420px; border-radius: 16px;">
-      <h3 class="fw-bold mb-2">🎬 MatchFlix Profile</h3>
-      <p class="text-muted mb-4">Welcome back, {{user.username}}!</p>
+    <div class="card shadow-lg p-4" style="width: 420px; border-radius: 16px;">
+
+      <!-- Profile Avatar + Welcome -->
+      <div class="d-flex flex-column align-items-center mb-3">
+
+        <!-- Avatar w/ Initial -->
+        <div
+          class="d-flex justify-content-center align-items-center rounded-circle mb-2"
+          style="
+            width: 72px;
+            height: 72px;
+            background: #e9ecef;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+          "
+        >
+          {{#if user.username}}
+            {{user.username.[0]}}
+          {{else}}
+            ?
+          {{/if}}
+        </div>
+
+        <h3 class="fw-bold mb-1">🎬 MatchFlix Profile</h3>
+
+        <p class="text-muted mb-1">
+          Welcome back, <span class="fw-semibold">{{user.username}}</span>!
+        </p>
+
+        {{#if stats.totalLiked}}
+          <p class="text-muted small mb-0">
+            You've liked <span class="fw-semibold">{{stats.totalLiked}}</span>
+            movie{{#if (gt stats.totalLiked 1)}}s{{/if}} so far.
+          </p>
+        {{else}}
+          <p class="text-muted small mb-0">
+            You haven't liked any movies yet — start swiping to build your profile!
+          </p>
+        {{/if}}
+
+      </div>
 
       {{#if message}}
-        <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center" role="alert">
+        <div
+          class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center"
+          role="alert"
+        >
           {{message}}
         </div>
       {{/if}}
 
-      <div class="mb-3">
-        <h6 class="fw-bold">🎥 Total Liked Movies</h6>
-        <p class="fs-5 text-primary mb-0">{{stats.totalLiked}}</p>
+      <hr class="my-3" />
+
+      <!-- Stats -->
+      <div class="row text-center">
+        <div class="col-6 mb-3">
+          <h6 class="fw-bold mb-1">🎥 Total Liked</h6>
+          <p class="fs-4 text-primary mb-0">{{stats.totalLiked}}</p>
+        </div>
+
+        <div class="col-6 mb-3">
+          <h6 class="fw-bold mb-1">🎭 Top Genre</h6>
+          <p class="fs-6 text-success mb-0">
+            {{#if stats.topGenre}}{{stats.topGenre}}{{else}}N/A{{/if}}
+          </p>
+        </div>
+
+        <div class="col-6 mb-3">
+          <h6 class="fw-bold mb-1">👨‍🎤 Favorite Actor</h6>
+          <p class="fs-6 text-warning mb-0 text-truncate">
+            {{#if stats.topActor}}{{stats.topActor}}{{else}}N/A{{/if}}
+          </p>
+        </div>
+
+        <div class="col-6 mb-3">
+          <h6 class="fw-bold mb-1">👩‍🎤 Favorite Actress</h6>
+          <p class="fs-6 text-danger mb-0 text-truncate">
+            {{#if stats.topActress}}{{stats.topActress}}{{else}}N/A{{/if}}
+          </p>
+        </div>
       </div>
 
-      <!-- Most liked genre based on user's liked movie data -->
-      <div class="mb-3">
-        <h6 class="fw-bold">🎭 Most Liked Genre</h6>
-        <p class="fs-5 text-success mb-0">{{stats.topGenre}}</p>
-      </div>
-      <!-- Most frequently liked actor -->
+      <hr class="my-3" />
 
-      <div class="mb-3">
-        <h6 class="fw-bold">👨‍🎤 Favorite Actor</h6>
-        <p class="fs-5 text-warning mb-0">{{stats.topActor}}</p>
-      </div>
-      <!-- Most frequently liked actress -->
+      <!-- Navigation Buttons -->
+      <div class="d-grid gap-2 mb-2">
+        <a href="/discover" class="btn btn-primary fw-semibold">
+          🔎 Discover Movies
+        </a>
 
-      <div class="mb-3">
-        <h6 class="fw-bold">👩‍🎤 Favorite Actress</h6>
-        <p class="fs-5 text-danger mb-0">{{stats.topActress}}</p>
+        <a href="/swipe" class="btn btn-outline-primary fw-semibold">
+          👉 Keep Swiping
+        </a>
+
+        <a href="/liked" class="btn btn-outline-secondary fw-semibold">
+          ❤️ View Liked Movies
+        </a>
       </div>
 
-      <hr>
-      <a href="/logout" class="btn btn-outline-dark w-100 fw-semibold mt-2">Log Out</a>
+      <!-- Logout Button -->
+      <a href="/logout" class="btn btn-outline-dark w-100 fw-semibold mt-1">
+        Log Out
+      </a>
+
     </div>
   </div>
+
 </body>
 </html>
