@@ -5,122 +5,110 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{user.username}}'s Profile</title>
 
-  <!-- Bootstrap CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 
 <body style="background-color: #f8f9fa;">
 
   {{> navbar }}
 
-  <div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="container d-flex justify-content-center align-items-center min-vh-100 py-4">
     <div class="card shadow-lg p-4" style="width: 420px; border-radius: 16px;">
 
-      <!-- Profile Avatar + Welcome -->
+      <!-- Avatar -->
       <div class="d-flex flex-column align-items-center mb-3">
-
-        <!-- Avatar w/ Initial -->
         <div
           class="d-flex justify-content-center align-items-center rounded-circle mb-2"
-          style="
-            width: 72px;
-            height: 72px;
-            background: #e9ecef;
-            font-size: 2.2rem;
-            font-weight: 700;
-            text-transform: uppercase;
-          "
+          style="width: 72px; height: 72px; background: #e9ecef; font-size: 2.2rem; font-weight: 700; text-transform: uppercase;"
         >
-          {{#if user.username}}
-            {{user.username.[0]}}
-          {{else}}
-            ?
-          {{/if}}
+          {{user.username.[0]}}
         </div>
 
         <h3 class="fw-bold mb-1">🎬 MatchFlix Profile</h3>
-
         <p class="text-muted mb-1">
           Welcome back, <span class="fw-semibold">{{user.username}}</span>!
         </p>
 
-        {{#if stats.totalLiked}}
-          <p class="text-muted small mb-0">
-            You've liked <span class="fw-semibold">{{stats.totalLiked}}</span> movies so far.
-          </p>
-        {{else}}
-          <p class="text-muted small mb-0">
-            You haven't liked any movies yet — start swiping to build your profile!
-          </p>
-        {{/if}}
-
+        <p class="text-muted small mb-0">
+          You've liked <span class="fw-semibold">{{stats.totalLiked}}</span> movies so far.
+        </p>
       </div>
 
       {{#if message}}
-        <div
-          class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center"
-          role="alert"
-        >
+        <div class="alert {{#if error}}alert-danger{{else}}alert-success{{/if}} text-center" role="alert">
           {{message}}
         </div>
       {{/if}}
 
       <hr class="my-3" />
 
-      <!-- Stats -->
-      <div class="row text-center">
+      <!-- Favorites Section -->
+      <h6 class="fw-bold mb-2 text-center">⭐ Your Favorites</h6>
+
+      <div class="row text-center mb-3">
         <div class="col-6 mb-3">
-          <h6 class="fw-bold mb-1">🎥 Total Liked</h6>
-          <p class="fs-4 text-primary mb-0">{{stats.totalLiked}}</p>
+          <h6 class="fw-bold mb-1">🎭 Genre</h6>
+          <p class="text-success mb-0">{{#if user.favorite_genre}}{{user.favorite_genre}}{{else}}N/A{{/if}}</p>
         </div>
 
         <div class="col-6 mb-3">
-          <h6 class="fw-bold mb-1">🎭 top Genre</h6>
-          <p class="fs-6 text-success mb-0">
-            {{#if stats.topGenre}}{{stats.topGenre}}{{else}}N/A{{/if}}
-          </p>
+          <h6 class="fw-bold mb-1">👨‍🎤 Actor</h6>
+          <p class="text-warning text-truncate mb-0">{{#if user.favorite_actor}}{{user.favorite_actor}}{{else}}N/A{{/if}}</p>
         </div>
 
-        <div class="col-6 mb-3">
-          <h6 class="fw-bold mb-1">👨‍🎤 Favorite Actor</h6>
-          <p class="fs-6 text-warning mb-0 text-truncate">
-            {{#if stats.topActor}}{{stats.topActor}}{{else}}N/A{{/if}}
-          </p>
-        </div>
-
-        <div class="col-6 mb-3">
-          <h6 class="fw-bold mb-1">👩‍🎤 Favorite Actress</h6>
-          <p class="fs-6 text-danger mb-0 text-truncate">
-            {{#if stats.topActress}}{{stats.topActress}}{{else}}N/A{{/if}}
-          </p>
+        <div class="col-12 mb-3">
+          <h6 class="fw-bold mb-1">👩‍🎤 Actress</h6>
+          <p class="text-danger text-truncate mb-0">{{#if user.favorite_actress}}{{user.favorite_actress}}{{else}}N/A{{/if}}</p>
         </div>
       </div>
+
+      <!-- Edit Button -->
+      <div class="text-center mb-3">
+        <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('editForm').classList.toggle('d-none')">
+          ✏️ Edit Favorites
+        </button>
+      </div>
+
+      <!-- Edit Favorites Form -->
+      <form id="editForm" class="d-none" action="/profile/favorites" method="POST">
+        <div class="mb-2">
+          <label class="form-label">Favorite Genre</label>
+          <select class="form-select form-select-sm" name="favorite_genre">
+            <option value="">Select a Genre</option>
+            <option {{#if (eq user.favorite_genre "Action")}}selected{{/if}}>Action</option>
+            <option {{#if (eq user.favorite_genre "Comedy")}}selected{{/if}}>Comedy</option>
+            <option {{#if (eq user.favorite_genre "Drama")}}selected{{/if}}>Drama</option>
+            <option {{#if (eq user.favorite_genre "Sci-Fi")}}selected{{/if}}>Sci-Fi</option>
+            <option {{#if (eq user.favorite_genre "Romance")}}selected{{/if}}>Romance</option>
+            <option {{#if (eq user.favorite_genre "Horror")}}selected{{/if}}>Horror</option>
+            <option {{#if (eq user.favorite_genre "Thriller")}}selected{{/if}}>Thriller</option>
+            <option {{#if (eq user.favorite_genre "Documentary")}}selected{{/if}}>Documentary</option>
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Favorite Actor</label>
+          <input name="favorite_actor" class="form-control form-control-sm" value="{{user.favorite_actor}}" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Favorite Actress</label>
+          <input name="favorite_actress" class="form-control form-control-sm" value="{{user.favorite_actress}}" />
+        </div>
+
+        <button class="btn btn-primary btn-sm w-100">Save Changes</button>
+      </form>
 
       <hr class="my-3" />
 
-      <!-- Navigation Buttons -->
+      <!-- Navigation -->
       <div class="d-grid gap-2 mb-2">
-        <a href="/discover" class="btn btn-primary fw-semibold">
-          🔎 Discover Movies
-        </a>
-
-        <a href="/swipe" class="btn btn-outline-primary fw-semibold">
-          👉 Keep Swiping
-        </a>
-
-        <a href="/liked" class="btn btn-outline-secondary fw-semibold">
-          ❤️ View Liked Movies
-        </a>
+        <a href="/discover" class="btn btn-primary fw-semibold">🔎 Discover Movies</a>
+        <a href="/swipe" class="btn btn-outline-primary fw-semibold">👉 Keep Swiping</a>
+        <a href="/liked" class="btn btn-outline-secondary fw-semibold">❤️ View Liked Movies</a>
       </div>
 
-      <!-- Logout Button -->
-      <a href="/logout" class="btn btn-outline-dark w-100 fw-semibold mt-1">
-        Log Out
-      </a>
-
+      <a href="/logout" class="btn btn-outline-dark w-100 fw-semibold mt-1">Log Out</a>
     </div>
   </div>
 
