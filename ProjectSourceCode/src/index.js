@@ -140,17 +140,8 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
- const {
-  username,
-  password,
-  firstName,
-  lastName,
-  email,
-  dateOfBirth,
-  favorite_genre,
-  favorite_actor,
-  favorite_actress,
-} = req.body;
+  const { username, password, firstName, lastName, email, dateOfBirth } =
+    req.body;
 
   try {
     // Minimum password length: 8
@@ -166,22 +157,9 @@ app.post("/register", async (req, res) => {
 
     // insert user into database
     await db.none(
-      `INSERT INTO users (
-  username, password, firstName, lastName, email, dateOfBirth,
-  favorite_genre, favorite_actor, favorite_actress
-)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [
-  username,
-  hashedPassword,
-  firstName,
-  lastName,
-  email,
-  dateOfBirth,
-  favorite_genre || null,
-  favorite_actor || null,
-  favorite_actress || null,
-]
+      `INSERT INTO users (username, password, firstName, lastName, email, dateOfBirth)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [username, hashedPassword, firstName, lastName, email, dateOfBirth]
     );
 
     return res.redirect("/login");
@@ -293,16 +271,15 @@ app.get("/profile", async (req, res) => {
       [username]
     );
 
-    const user = await db.one(
-  `SELECT username, favorite_genre, favorite_actor, favorite_actress
-   FROM users WHERE username = $1`,
-  [username]
-);
-
-res.render("pages/profile", {
-  user,
-  stats: { totalLiked: Number(count) },
-});
+    res.render("pages/profile", {
+      user: { username },
+      stats: {
+        totalLiked: Number(count),
+        topGenre: "N/A", // not stored in swipes table
+        topActor: "N/A",
+        topActress: "N/A",
+      },
+    });
   } catch (err) {
     console.error("Error loading profile:", err);
     res.render("pages/profile", {
@@ -316,27 +293,6 @@ res.render("pages/profile", {
       message: "Error loading profile data",
       error: true,
     });
-  }
-});
-
-app.post("/profile/favorites", auth, async (req, res) => {
-  const username = req.session.username;
-  const { favorite_genre, favorite_actor, favorite_actress } = req.body;
-
-  try {
-    await db.none(
-      `UPDATE users
-       SET favorite_genre = $1,
-           favorite_actor = $2,
-           favorite_actress = $3
-       WHERE username = $4`,
-      [favorite_genre, favorite_actor, favorite_actress, username]
-    );
-
-    res.redirect("/profile");
-  } catch (err) {
-    console.error("Favorite update error:", err);
-    res.redirect("/profile");
   }
 });
 
