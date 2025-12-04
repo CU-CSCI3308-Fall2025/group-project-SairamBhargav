@@ -353,6 +353,8 @@ app.get('/liked', async (req,res) => {
   }
   catch (err) {
     console.error(`Error:`, err);
+  }
+})
 // Swipe feature route
 app.get("/swipe", async (req, res) => {
   try {
