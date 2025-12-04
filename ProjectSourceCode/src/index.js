@@ -290,34 +290,29 @@ app.get('/liked', async (req,res) => {
         likedMoviesAPI.push(null);
       }
 
-        const movie = response.data;
+    }
 
-        return {
-          id: movie.id,
-          title: movie.title,
-          overview: movie.overview || "No overview available.",
-          posterPath: movie.poster_path
-            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-            : null,
-          releaseDate: movie.release_date || "Unknown",
-          rating: movie.vote_average ? movie.vote_average.toFixed(1) : "N/A",
-        };
-      })
-    );
+    const likedMovies = likedMoviesAPI.map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+      overview: movie.overview,
+      posterPath: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null,
+      releaseDate: movie.release_date,
+      rating: movie.vote_average,
+    }));
 
     res.render("pages/liked", {
       movies: likedMovies,
       username: req.session.username,
     });
-  } catch (err) {
-    console.error("Error loading liked movies:", err);
-    res.render("pages/liked", {
-      movies: [],
-      username: req.session.username,
-      error: "Failed to load liked movies.",
-    });
+
   }
-});
+  catch (err) {
+    console.error(`Error:`, err);
+  }
+})
 
 // ---------- SWIPE FEATURE ----------
 
