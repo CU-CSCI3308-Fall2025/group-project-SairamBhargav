@@ -7,7 +7,7 @@ const pgp = require("pg-promise")(); // To connect to the Postgres DB from the n
 const bodyParser = require("body-parser");
 const session = require("express-session"); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const bcrypt = require("bcryptjs"); //  To hash passwords
-const axios = require("axios"); // To make HTTP requests from our server. We'll learn more about it in Part C.
+const axios = require("axios"); // To make HTTP requests from our server.
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -49,19 +49,19 @@ db.connect()
 app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
+
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     saveUninitialized: false,
     resave: false,
-  })
-);
-
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
   })
 );
 
@@ -76,15 +76,15 @@ const auth = (req, res, next) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 // *****************************************************
-// <!-- Section 4 : API Routes -->
+// <!-- Section 4 : Routes -->
 // *****************************************************
 
-// Simple welcome test
+// Simple test route
 app.get("/welcome", (req, res) => {
   res.json({ status: "success", message: "Welcome!" });
 });
 
-// Root redirect – FIXED to use username
+// Root redirect – use username, not user
 app.get("/", (req, res) => {
   if (req.session.username) {
     res.redirect("/discover");
@@ -92,6 +92,8 @@ app.get("/", (req, res) => {
     res.redirect("/login");
   }
 });
+
+// ---------- AUTH / LOGIN / REGISTER ----------
 
 // Register page
 app.get("/register", (req, res) => {
@@ -103,7 +105,7 @@ app.post("/register", async (req, res) => {
     req.body;
 
   try {
-    // Minimum password length, must be 8 characters mimimum
+    // Minimum password length: 8
     if (password.length < 8) {
       return res.render("pages/register", {
         message: "Registration failed. Password must be at least 8 characters.",
@@ -172,7 +174,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Discover page - shows movies from TMDB
+// ---------- DISCOVER (public routes above auth) ----------
+
 app.get("/discover", auth, async (req, res) => {
   try {
     // Fetch popular movies from TMDB
@@ -201,7 +204,7 @@ app.get("/discover", auth, async (req, res) => {
     }));
 
     res.render("pages/discover", {
-      movies: movies,
+      movies,
       username: req.session.username,
     });
   } catch (err) {
@@ -213,17 +216,17 @@ app.get("/discover", auth, async (req, res) => {
   }
 });
 
-// Authentication Required for all routes below this line
+// All routes below this line require authentication
 app.use(auth);
 
-// --- PROFILE ROUTE ---
-// Pulls stats from the `swipes` table where action = 'like'
+// ---------- PROFILE (uses swipes table) ----------
+
 app.get("/profile", async (req, res) => {
   const username = req.session.username;
 
   try {
-    // 1. Total liked movies
-    const totalLikedRow = await db.one(
+    // Count liked swipes for this user
+    const { count } = await db.one(
       `
       SELECT COUNT(*) AS count
       FROM swipes
@@ -232,52 +235,13 @@ app.get("/profile", async (req, res) => {
       [username]
     );
 
-    // 2. Most liked genre
-    const topGenreRow = await db.oneOrNone(
-      `
-      SELECT genre, COUNT(*) AS c
-      FROM swipes
-      WHERE username = $1 AND action = 'like' AND genre IS NOT NULL
-      GROUP BY genre
-      ORDER BY c DESC
-      LIMIT 1
-      `,
-      [username]
-    );
-
-    // 3. Most liked actor
-    const topActorRow = await db.oneOrNone(
-      `
-      SELECT actor, COUNT(*) AS c
-      FROM swipes
-      WHERE username = $1 AND action = 'like' AND actor IS NOT NULL
-      GROUP BY actor
-      ORDER BY c DESC
-      LIMIT 1
-      `,
-      [username]
-    );
-
-    // 4. Most liked actress
-    const topActressRow = await db.oneOrNone(
-      `
-      SELECT actress, COUNT(*) AS c
-      FROM swipes
-      WHERE username = $1 AND action = 'like' AND actress IS NOT NULL
-      GROUP BY actress
-      ORDER BY c DESC
-      LIMIT 1
-      `,
-      [username]
-    );
-
     res.render("pages/profile", {
       user: { username },
       stats: {
-        totalLiked: totalLikedRow.count || 0,
-        topGenre: topGenreRow?.genre || "N/A",
-        topActor: topActorRow?.actor || "N/A",
-        topActress: topActressRow?.actress || "N/A",
+        totalLiked: Number(count),
+        topGenre: "N/A", // not stored in swipes table
+        topActor: "N/A",
+        topActress: "N/A",
       },
     });
   } catch (err) {
@@ -296,8 +260,8 @@ app.get("/profile", async (req, res) => {
   }
 });
 
-// --- LIKED MOVIES PAGE ---
-// Uses `swipes` table (action='like') and TMDB to show liked movie details
+// ---------- LIKED MOVIES PAGE (from swipes + TMDB) ----------
+
 app.get("/liked", async (req, res) => {
   const username = req.session.username;
 
@@ -350,23 +314,22 @@ app.get("/liked", async (req, res) => {
   }
 });
 
-// Swipe feature route
+// ---------- SWIPE FEATURE ----------
+
 app.get("/swipe", async (req, res) => {
   try {
-    // Fetch a random movie from TMDB
+    // Fetch a random page and random movie
     const randomPage = Math.floor(Math.random() * 500) + 1;
 
     const response = await fetch(
-      `https://api.themoviedb.org/3/movie/popular?api_key=98d9665b319075a5eaf64410976293ab&page=${randomPage}`
+      `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY}&page=${randomPage}`
     );
 
     const data = await response.json();
 
-    // Pick a random movie from the results
     const randomIndex = Math.floor(Math.random() * data.results.length);
     const movieData = data.results[randomIndex];
 
-    // Format the movie data
     const movie = {
       id: movieData.id,
       title: movieData.title,
@@ -380,15 +343,14 @@ app.get("/swipe", async (req, res) => {
       releaseDate: movieData.release_date || "Unknown",
     };
 
-    // Render the swipe template with the movie data
     res.render("pages/swipe", {
-      username: req.session.username || req.user?.username,
-      movie: movie,
+      username: req.session.username,
+      movie,
     });
   } catch (error) {
     console.error("Error fetching random movie:", error);
     res.render("pages/swipe", {
-      username: req.session.username || req.user?.username,
+      username: req.session.username,
       error: "Failed to load movie. Please try again.",
       movie: null,
     });
@@ -397,7 +359,7 @@ app.get("/swipe", async (req, res) => {
 
 app.post("/movies/like/:id", async (req, res) => {
   const username = req.session.username;
-  const movieId = parseInt(req.params.id, 10); // make sure it's an integer
+  const movieId = parseInt(req.params.id, 10);
 
   try {
     await db.none(
@@ -439,11 +401,12 @@ app.post("/movies/dislike/:id", async (req, res) => {
   }
 });
 
+// ---------- GEMINI RECOMMENDATIONS (uses swipes) ----------
+
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-// movie recommendation:
 app.post("/api/recommendations/generate", async (req, res) => {
   const username = req.session.username;
 
@@ -513,16 +476,12 @@ app.post("/api/recommendations/generate", async (req, res) => {
     }
 
     // 4. Extract JSON from the text
-
-    // Default: assume the whole text is JSON
     let jsonStr = text.trim();
 
-    // Case 1: wrapped in ```json ... ``` or ``` ... ```
     const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
     if (codeBlockMatch && codeBlockMatch[1]) {
       jsonStr = codeBlockMatch[1].trim();
     } else {
-      // Case 2: find first {...} block
       const braceMatch = text.match(/\{[\s\S]*\}/);
       if (braceMatch) {
         jsonStr = braceMatch[0].trim();
@@ -551,7 +510,6 @@ app.post("/api/recommendations/generate", async (req, res) => {
 
     console.log("[Reco] recommendedIds =", recommendedIds);
 
-    // 5. Fetch TMDB details for recommended movies
     const recommendedMovies = await Promise.all(
       recommendedIds.map(async (id) => {
         const details = await axios.get(
@@ -562,7 +520,6 @@ app.post("/api/recommendations/generate", async (req, res) => {
       })
     );
 
-    // 6. Success
     res.json({
       status: "success",
       recommendations: recommendedMovies,
@@ -573,20 +530,16 @@ app.post("/api/recommendations/generate", async (req, res) => {
   }
 });
 
-// -----------------------------------------------------
-// LOGOUT ROUTE
-// -----------------------------------------------------
+// ---------- LOGOUT ----------
+
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Error destroying session:", err);
-      return res.redirect("/discover"); // fallback if something breaks
+      return res.redirect("/discover");
     }
 
-    // Clear session cookie (default connect.sid)
     res.clearCookie("connect.sid");
-
-    // Redirect user to login page
     return res.redirect("/login");
   });
 });
@@ -594,6 +547,5 @@ app.get("/logout", (req, res) => {
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
-// starting the server and keeping the connection open to listen for more requests
 module.exports = app.listen(3000);
 console.log("Server is listening on port 3000");
