@@ -1,48 +1,60 @@
 <style>
+    .swipe-page {
+        min-height: calc(100vh - 72px);
+        display: flex;
+        align-items: center;
+    }
+
     .swipe-row {
         text-align: center;
     }
 
-    /* Poster wrapper */
+    .swipe-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .swipe-subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
     .poster-wrapper {
         position: relative;
         overflow: hidden;
-        border-radius: 12px;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 14px 25px rgba(0, 0, 0, 0.15);
     }
 
-    /* Poster scaled down so page fits */
     .swipe-poster {
         width: 100%;
         height: auto;
-        max-height: 500px;
+        max-height: 520px;
         object-fit: contain;
-        border-radius: 12px;
-        background-color: #e8e8e8;
+        border-radius: 18px;
+        background-color: #f5f5f5;
     }
 
     .swipe-card {
-        border-radius: 12px;
+        border-radius: 18px;
         background: #ffffff;
-        padding-bottom: 5px;
+        padding: 10px 10px 14px;
+        color: #212529;
     }
 
-    /* Hover overlay */
     .movie-info-overlay {
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
-
-        background: rgba(0, 0, 0, 0.75);
+        background: rgba(0, 0, 0, 0.8);
         color: #ffffff;
-
-        padding: 10px 12px;
-
+        padding: 12px 14px;
         opacity: 0;
         transform: translateY(100%);
         transition: opacity 0.25s ease, transform 0.25s ease;
-
-        max-height: 45%;
+        max-height: 50%;
         overflow-y: auto;
     }
 
@@ -52,15 +64,43 @@
     }
 
     .overlay-title {
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 600;
+        margin-bottom: 4px;
     }
 
     .overlay-text {
         font-size: 0.85rem;
+        line-height: 1.4;
     }
 
-    /* Large side buttons */
+    .movie-meta-bar {
+        margin-top: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .badge-rating {
+        background: #fff3cd;
+        color: #856404;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .badge-year {
+        background: #e9ecef;
+        color: #495057;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
     .bigVoteBtn {
         width: 110px;
         height: 110px;
@@ -69,7 +109,7 @@
         background: #ffffff;
         font-size: 45px;
         cursor: pointer;
-        box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 0 18px rgba(0, 0, 0, 0.25);
         transition: 0.2s;
     }
 
@@ -77,7 +117,6 @@
         transform: scale(0.93);
     }
 
-    /* Active glow colors */
     .bigVoteBtn.likeActive {
         background-color: #d3f9d8;
         border: 3px solid #2f9e44;
@@ -88,7 +127,7 @@
         border: 3px solid #e00b0b;
     }
 
-        #like-btn {
+    #like-btn {
         background: linear-gradient(to right, #d3f9d8 50%, #ffffff 50%);
         background-size: 200% 100%;
         background-position: right bottom;
@@ -114,17 +153,21 @@
         transform: scale(1.1);
     }
 
-    #skip-btn:hover{
-        transition: all .5s;
-        transform: scale(1.2);
+    #skip-btn {
+        border-radius: 999px;
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
     }
 
-    /* Recommendation modal */
+    #skip-btn:hover {
+        transition: all .5s;
+        transform: scale(1.07);
+    }
+
     .reco-modal {
         position: fixed;
         inset: 0;
         display: none;
-        /* hidden by default */
         align-items: center;
         justify-content: center;
         z-index: 1050;
@@ -199,101 +242,116 @@
         color: #666;
         margin-top: 4px;
     }
+
+    @media (max-width: 767.98px) {
+        .bigVoteBtn {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+    }
 </style>
 
 {{> navbar}}
 
-<div class="container mt-3">
+<div class="container mt-3 swipe-page">
 
-    <h2 class="text-center">🎥 Swipe for Movies!</h2>
-    <p class="text-center">Welcome, {{username}}!</p>
-
-    {{#if error}}
-    <div class="alert alert-danger text-center">
-        {{error}}
-    </div>
-    {{/if}}
-
-    {{#if movie}}
-
-    <div class="row swipe-row mt-3 justify-content-center align-items-center">
-
-        <!-- Hidden username for JS -->
-        <input type="hidden" id="username-hidden" value="{{username}}">
-        <!-- Hidden movie id if you ever need it in JS -->
-        <input type="hidden" id="movie-id" value="{{movie.id}}">
-
-        <!-- LEFT DISLIKE BUTTON -->
-        <div class="col-2 text-center">
-            <form method="POST" action="/movies/dislike/{{movie.id}}">
-                <button type="submit" id="dislike-btn" class="bigVoteBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b" viewBox="0 0 256 256">
-                        <path
-                            d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                        </path>
-                    </svg>
-                </button>
-            </form>
+    <div class="w-100">
+        <div class="swipe-header">
+            <h2 class="fw-bold mb-1">🎥 Swipe for Movies</h2>
+            <p class="mb-0">Welcome, <span class="fw-semibold">{{username}}</span>!</p>
+            <p class="swipe-subtitle mt-1">
+                Tap ❤️ to like, 👎 to pass, or skip to see the next random pick.
+            </p>
         </div>
 
-        <!-- POSTER + HOVER INFO -->
-        <div class="col-8">
-            <div class="swipe-card">
-                <div class="poster-wrapper">
+        {{#if error}}
+        <div class="alert alert-danger text-center">
+            {{error}}
+        </div>
+        {{/if}}
 
-                    {{#if movie.posterPath}}
-                    <img src="{{movie.posterPath}}" class="swipe-poster" alt="{{movie.title}}" />
-                    {{else}}
-                    <div class="d-flex align-items-center justify-content-center"
-                        style="height: 400px; background: #222; border-radius: 12px;">
-                        <span class="text-white">No Image</span>
-                    </div>
-                    {{/if}}
+        {{#if movie}}
 
-                    <!-- Hover overlay -->
-                    <div class="movie-info-overlay">
-                        <div class="overlay-title">{{movie.title}}</div>
-                        <div class="overlay-text">{{movie.overview}}</div>
-                        <div class="overlay-text mt-2">
-                            ⭐ Rating: {{movie.rating}}/10 <br>
-                            📅 Release: {{movie.releaseDate}}
+        <div class="row swipe-row mt-3 justify-content-center align-items-center gx-4 gy-4">
+
+            <input type="hidden" id="username-hidden" value="{{username}}">
+            <input type="hidden" id="movie-id" value="{{movie.id}}">
+
+            <div class="col-3 col-md-2 text-center">
+                <form method="POST" action="/movies/dislike/{{movie.id}}">
+                    <button type="submit" id="dislike-btn" class="bigVoteBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#e00b0b" viewBox="0 0 256 256">
+                            <path
+                                d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
+                            </path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-10 col-md-8 col-lg-6">
+                <div class="swipe-card">
+                    <div class="poster-wrapper">
+                        {{#if movie.posterPath}}
+                        <img src="{{movie.posterPath}}" class="swipe-poster" alt="{{movie.title}}" />
+                        {{else}}
+                        <div class="d-flex align-items-center justify-content-center"
+                            style="height: 400px; background: #f5f5f5; border-radius: 18px;">
+                            <span class="text-muted">No Image</span>
+                        </div>
+                        {{/if}}
+
+                        <div class="movie-info-overlay">
+                            <div class="overlay-title">{{movie.title}}</div>
+                            <div class="overlay-text">{{movie.overview}}</div>
+                            <div class="overlay-text mt-2">
+                                ⭐ Rating: {{movie.rating}}/10 <br>
+                                📅 Release: {{movie.releaseDate}}
+                            </div>
                         </div>
                     </div>
 
+                    <div class="movie-meta-bar">
+                        <span class="badge-rating">⭐ {{movie.rating}}/10</span>
+                        <span class="badge-year">
+                            {{#if movie.releaseDate}}
+                                {{movie.releaseDate}}
+                            {{else}}
+                                Coming soon
+                            {{/if}}
+                        </span>
+                    </div>
                 </div>
-
             </div>
+
+            <div class="col-3 col-md-2 text-center">
+                <form method="POST" action="/movies/like/{{movie.id}}">
+                    <button type="submit" id="like-btn" class="bigVoteBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44" viewBox="0 0 256 256">
+                            <path
+                                d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
+                            </path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
         </div>
 
-        <!-- RIGHT LIKE BUTTON -->
-        <div class="col-2 text-center">
-            <form method="POST" action="/movies/like/{{movie.id}}">
-                <button type="submit" id="like-btn" class="bigVoteBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#2f9e44" viewBox="0 0 256 256">
-                        <path
-                            d="M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z">
-                        </path>
-                    </svg>
-                </button>
-            </form>
+        <div class="text-center mt-">
+            <a href="/swipe" id="skip-btn" class="btn btn-dark btn-lg px-4">
+                Skip
+            </a>
         </div>
 
+        {{else}}
+        <p class="text-center mt-5">No movie available.</p>
+        {{/if}}
     </div>
-
-    <!-- NEXT MOVIE BUTTON BELOW EVERYTHING -->
-    <div class="text-center mt-4">
-        <a href="/swipe" id = "skip-btn" class="btn btn-dark btn-lg px-4">
-            Skip
-        </a>
-    </div>
-
-    {{else}}
-    <p class="text-center mt-5">No movie available.</p>
-    {{/if}}
 
 </div>
 
-<!-- Recommendation popup modal -->
 <div id="reco-modal" class="reco-modal">
     <div class="reco-backdrop"></div>
     <div class="reco-content">
@@ -309,7 +367,6 @@
 </div>
 
 <script>
-    // Visual button state (green/red glow)
     document.addEventListener("DOMContentLoaded", function () {
         const likeBtn = document.getElementById("like-btn");
         const dislikeBtn = document.getElementById("dislike-btn");
@@ -317,37 +374,28 @@
         if (likeBtn) {
             likeBtn.addEventListener("mousedown", () => {
                 likeBtn.classList.add("likeActive");
-                dislikeBtn && dislikeBtn.classList.remove("dislikeActive");
+                if (dislikeBtn) dislikeBtn.classList.remove("dislikeActive");
             });
         }
 
         if (dislikeBtn) {
             dislikeBtn.addEventListener("mousedown", () => {
                 dislikeBtn.classList.add("dislikeActive");
-                likeBtn && likeBtn.classList.remove("likeActive");
+                if (likeBtn) likeBtn.classList.remove("likeActive");
             });
         }
     });
 
-    // Recommendation popup logic (every 10 swipes)
     document.addEventListener("DOMContentLoaded", function () {
         const usernameInput = document.getElementById("username-hidden");
         const modal = document.getElementById("reco-modal");
         const closeBtn = document.getElementById("reco-close");
         const recoList = document.getElementById("reco-list");
 
-        console.log("DEBUG: swipe JS loaded");
-
-        if (!usernameInput || !modal || !recoList) {
-            console.log("DEBUG: missing elements", { usernameInput, modal, recoList });
-            return;
-        }
+        if (!usernameInput || !modal || !recoList) return;
 
         const username = usernameInput.value;
-        if (!username) {
-            console.log("DEBUG: no username");
-            return;
-        }
+        if (!username) return;
 
         const key = "swipeCount_" + username;
         let count = parseInt(localStorage.getItem(key) || "0", 10);
@@ -356,24 +404,15 @@
         count += 1;
         localStorage.setItem(key, String(count));
 
-        console.log("DEBUG: username =", username, "swipe count =", count);
-
         if (count % 10 === 0) {
-            console.log("DEBUG: triggering recommendations fetch");
-
             fetch("/api/recommendations/generate", {
                 method: "POST"
             })
                 .then(async (res) => {
-                    console.log("DEBUG: /api/recommendations/generate status =", res.status);
-                    if (!res.ok) {
-                        throw new Error("Status " + res.status);
-                    }
+                    if (!res.ok) throw new Error("Status " + res.status);
                     return res.json();
                 })
                 .then((data) => {
-                    console.log("DEBUG: recommendations response", data);
-
                     if (!data || !Array.isArray(data.recommendations)) return;
 
                     recoList.innerHTML = "";
@@ -419,9 +458,7 @@
 
                     modal.classList.add("show");
                 })
-                .catch((err) => {
-                    console.warn("Could not load recommendations:", err.message);
-                });
+                .catch(() => {});
         }
 
         if (closeBtn) {
