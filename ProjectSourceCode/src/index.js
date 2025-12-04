@@ -295,6 +295,64 @@ app.get("/profile", async (req, res) => {
   }
 });
 
+app.get('/liked', async (req,res) => {
+
+  const username = session.username;
+  const query = `
+    SELECT movie_id
+    FROM liked_movies
+    WHERE username = $1
+  `
+  try{
+
+    const likedMoviesIDs = await db.any(query, [username]);
+
+    const likedMoviesAPI = [];
+
+    for (const row of likedMoviesIDs) {
+      const imdbId = row.movie_id;
+
+      const url = `https://api.themoviedb.org/3/find/${imdbId}?external_source=imdb_id&language=en-US&api_key=${apiKey}`;
+
+      try {
+        // Step 3: Fetch TMDB data
+        const res = await fetch(url);
+        const data = await res.json();
+
+        // Step 4: Push movie info (TMDB returns an array)
+        if (data.movie_results && ddata.movie_results.length > 0) {
+          likedMoviesAPI.push(data.movie_results[0]); 
+        } else {
+          likedMoviesAPI.push(null);  // or skip it
+        }
+
+      } catch (err) {
+        console.error(`Error fetching ${imdbId}:`, err);
+        likedMoviesAPI.push(null);
+      }
+
+    }
+
+    const likedMovies = likedMoviesAPI.map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+      overview: movie.overview,
+      posterPath: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null,
+      releaseDate: movie.release_date,
+      rating: movie.vote_average,
+    }));
+
+    console.log(likedMovies);
+    res.render("pages/liked", {
+      movies: likedMovies,
+      username: req.session.username,
+    });
+
+  }
+  catch (err) {
+    console.error(`Error:`, err);
 // Swipe feature route
 app.get("/swipe", async (req, res) => {
   try {
