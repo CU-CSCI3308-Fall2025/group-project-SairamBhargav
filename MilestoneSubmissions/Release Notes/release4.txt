@@ -1,0 +1,13 @@
+11/18
+
+things done-
+-username recommendation
+-api routes
+-swipe page
+
+things needed to be done-
+-algorithim for swipe page
+-forgot password feature?
+-plan on whether we want to do sessions for the app
+-also plan on whether we want to do liking a movie from the discover page
+-need to get the swiped page into the liked bank

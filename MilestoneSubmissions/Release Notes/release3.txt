@@ -1,0 +1,14 @@
+11/12 met with group
+
+Things done since last meeting
+-Have somewhat of a working page going
+-Register page is made but not fully done
+-Profile page is working
+-Discover page is working
+
+
+
+Things done by next time:
+-need a search bar-
+-nned a liked bank for the movies once a user swipes on the a movie
+-SWIPE PAGE!! VERY IMPORTANT FEATURE

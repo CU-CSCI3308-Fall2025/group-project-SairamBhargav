@@ -1,0 +1,9 @@
+Met with group on 10/28 after TA meeting
+
+Things done:
+-Came up with the main features
+
+
+Things needed to be done: 
+-figure out API ASAP
+-Also need to assign each other tasks and what features each person will work on

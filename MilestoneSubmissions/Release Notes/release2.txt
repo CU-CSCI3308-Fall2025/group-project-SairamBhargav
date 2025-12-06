@@ -1,0 +1,12 @@
+Met with group on 11/5
+
+Things done since last meeting:
+-No one had started coding yet, everyone had reaearched things to for their features. 
+Karson had started setting up some database stuff but that is about it.
+
+Things need to be done:
+-CODE 
+-Neville needs to get basic stucture of register page
+-Aswaanth needs to get the profile page up
+-Need Bhargav to start researching about the algorithim
+-Karson and Charlie and Ryan really need to get barebone of the swipe page done
